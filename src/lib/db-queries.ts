@@ -54,7 +54,7 @@ function formatViews(views: number): string {
 }
 
 // Normalize article row from DB for frontend
-function normalizeArticle(row: RowDataPacket) {
+function normalizeArticle(row: any) {
   return {
     ...row,
     date: formatDate(row.created_at),

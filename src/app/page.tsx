@@ -41,7 +41,7 @@ export default async function Home() {
           {/* Main Hero Story */}
           <section>
             <Link href={`/article/${heroArticle.slug}`}>
-              <div style={{ position: 'relative', borderRadius: '8px', overflow: 'hidden', height: '500px', backgroundColor: '#1f2937', cursor: 'pointer' }}>
+              <div style={{ position: 'relative', borderRadius: '8px', overflow: 'hidden', height: '500px', backgroundColor: '#1f2937', cursor: 'pointer', backgroundImage: heroArticle.image_url ? `url(${heroArticle.image_url})` : 'none', backgroundSize: 'cover', backgroundPosition: 'center' }}>
                 <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '2rem', background: 'linear-gradient(transparent, rgba(0,0,0,0.9))', color: 'white' }}>
                   <span style={{ backgroundColor: 'var(--primary-color)', padding: '0.3rem 0.6rem', borderRadius: '4px', fontSize: '0.8rem', fontWeight: 'bold', textTransform: 'uppercase', marginBottom: '1rem', display: 'inline-block' }}>{heroArticle.category_name} Breaking</span>
                   <h2 style={{ fontSize: '2.5rem', fontWeight: 'bold', marginBottom: '0.5rem', lineHeight: '1.2' }}>{heroArticle.title}</h2>
@@ -56,7 +56,9 @@ export default async function Home() {
               {secondaryArticles.map((article: any) => (
                 <Link key={article.id} href={`/article/${article.slug}`}>
                   <div style={{ backgroundColor: 'white', borderRadius: '8px', overflow: 'hidden', display: 'flex', gap: '1rem', padding: '1rem', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', cursor: 'pointer' }}>
-                    <div style={{ width: '100px', height: '100px', backgroundColor: '#e5e7eb', borderRadius: '4px', flexShrink: 0 }}></div>
+                    <div style={{ width: '100px', height: '100px', backgroundColor: '#e5e7eb', borderRadius: '4px', flexShrink: 0, overflow: 'hidden' }}>
+                      {article.image_url && <img src={article.image_url} alt={article.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
+                    </div>
                     <div>
                       <span style={{ color: 'var(--primary-color)', fontSize: '0.75rem', fontWeight: 'bold', textTransform: 'uppercase' }}>{article.category_name}</span>
                       <h3 style={{ fontSize: '1rem', fontWeight: 'bold', margin: '0.25rem 0 0.5rem 0', lineHeight: '1.3' }}>{article.title}</h3>
@@ -102,7 +104,9 @@ export default async function Home() {
             {latest.slice(3, 7).map((article: any) => (
               <Link key={article.id} href={`/article/${article.slug}`}>
                 <div style={{ backgroundColor: 'white', borderRadius: '8px', overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', cursor: 'pointer' }}>
-                  <div style={{ height: '160px', backgroundColor: '#e5e7eb' }}></div>
+                  <div style={{ height: '160px', backgroundColor: '#e5e7eb', overflow: 'hidden' }}>
+                    {article.image_url && <img src={article.image_url} alt={article.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
+                  </div>
                   <div style={{ padding: '1rem' }}>
                     <span style={{ color: 'var(--primary-color)', fontSize: '0.7rem', fontWeight: 'bold', textTransform: 'uppercase' }}>{article.category_name}</span>
                     <h4 style={{ fontSize: '1.1rem', fontWeight: 'bold', lineHeight: '1.3', marginBottom: '0.5rem', marginTop: '0.25rem' }}>{article.title}</h4>
@@ -127,7 +131,9 @@ export default async function Home() {
               {(sportsArticles.length > 0 ? sportsArticles : latest.slice(0, 4)).map((article: any) => (
                 <Link key={article.id} href={`/article/${article.slug}`}>
                   <div style={{ backgroundColor: 'white', borderRadius: '8px', overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', cursor: 'pointer' }}>
-                    <div style={{ height: '160px', backgroundColor: '#e5e7eb' }}></div>
+                    <div style={{ height: '160px', backgroundColor: '#e5e7eb', overflow: 'hidden' }}>
+                    {article.image_url && <img src={article.image_url} alt={article.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
+                  </div>
                     <div style={{ padding: '1rem' }}>
                       <h4 style={{ fontSize: '1.1rem', fontWeight: 'bold', lineHeight: '1.3', marginBottom: '0.5rem' }}>{article.title}</h4>
                       <span style={{ fontSize: '0.8rem', color: 'var(--text-light)' }}>{article.date}</span>
@@ -148,7 +154,9 @@ export default async function Home() {
               {(crimeArticles.length > 0 ? crimeArticles : latest.slice(0, 4)).map((article: any) => (
                 <Link key={article.id} href={`/article/${article.slug}`}>
                   <div style={{ backgroundColor: 'white', borderRadius: '8px', overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', cursor: 'pointer' }}>
-                    <div style={{ height: '160px', backgroundColor: '#e5e7eb' }}></div>
+                    <div style={{ height: '160px', backgroundColor: '#e5e7eb', overflow: 'hidden' }}>
+                    {article.image_url && <img src={article.image_url} alt={article.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
+                  </div>
                     <div style={{ padding: '1rem' }}>
                       <h4 style={{ fontSize: '1.1rem', fontWeight: 'bold', lineHeight: '1.3', marginBottom: '0.5rem' }}>{article.title}</h4>
                       <span style={{ fontSize: '0.8rem', color: 'var(--text-light)' }}>{article.date}</span>
@@ -169,7 +177,9 @@ export default async function Home() {
               {(politicalArticles.length > 0 ? politicalArticles : latest.slice(0, 4)).map((article: any) => (
                 <Link key={article.id} href={`/article/${article.slug}`}>
                   <div style={{ backgroundColor: 'white', borderRadius: '8px', overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', cursor: 'pointer' }}>
-                    <div style={{ height: '160px', backgroundColor: '#e5e7eb' }}></div>
+                    <div style={{ height: '160px', backgroundColor: '#e5e7eb', overflow: 'hidden' }}>
+                    {article.image_url && <img src={article.image_url} alt={article.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
+                  </div>
                     <div style={{ padding: '1rem' }}>
                       <h4 style={{ fontSize: '1.1rem', fontWeight: 'bold', lineHeight: '1.3', marginBottom: '0.5rem' }}>{article.title}</h4>
                       <span style={{ fontSize: '0.8rem', color: 'var(--text-light)' }}>{article.date}</span>

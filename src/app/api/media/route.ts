@@ -62,6 +62,7 @@ export async function POST(request: NextRequest) {
       Key: s3Key,
       Body: buffer,
       ContentType: file.type,
+      ACL: 'public-read',
     }));
 
     const fileUrl = `https://${bucket}.s3.${region}.amazonaws.com/${s3Key}`;

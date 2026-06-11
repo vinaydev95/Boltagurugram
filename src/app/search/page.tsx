@@ -42,7 +42,9 @@ export default async function SearchPage({ searchParams }: { searchParams: { q?:
             {articles.map((article: any) => (
               <Link key={article.id} href={`/article/${article.slug}`}>
                 <article style={{ display: 'flex', gap: '1.5rem', backgroundColor: 'white', padding: '1.5rem', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', cursor: 'pointer' }}>
-                  <div style={{ width: '240px', height: '160px', backgroundColor: '#e5e7eb', borderRadius: '4px', flexShrink: 0 }}></div>
+                  <div style={{ width: '240px', height: '160px', backgroundColor: '#e5e7eb', borderRadius: '4px', flexShrink: 0, overflow: 'hidden' }}>
+                    {article.image_url && <img src={article.image_url} alt={article.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
+                  </div>
                   <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
                     <span style={{ color: 'var(--primary-color)', fontSize: '0.8rem', fontWeight: 'bold', textTransform: 'uppercase', marginBottom: '0.5rem' }}>{article.category_name}</span>
                     <h3 style={{ fontSize: '1.4rem', fontWeight: 'bold', marginBottom: '0.75rem', lineHeight: '1.3' }}>{article.title}</h3>

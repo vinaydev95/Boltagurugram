@@ -41,8 +41,10 @@ export default function Header() {
       <div style={{ backgroundColor: 'var(--primary-color)', color: 'white', padding: '0.5rem 1rem', fontSize: '0.85rem' }}>
         <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', alignItems: 'center' }}>
           <span style={{ fontWeight: 'bold', backgroundColor: 'white', color: 'var(--primary-color)', padding: '0.2rem 0.5rem', borderRadius: '3px', marginRight: '1rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Breaking</span>
+          {/* @ts-ignore */}
           <marquee style={{ flex: 1 }}>
             {breakingNews}
+          {/* @ts-ignore */}
           </marquee>
         </div>
       </div>

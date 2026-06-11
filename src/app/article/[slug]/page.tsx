@@ -94,8 +94,12 @@ export default async function ArticlePage({ params }: { params: { slug: string }
             </div>
 
             {/* Featured Image */}
-            <div style={{ width: '100%', height: '450px', backgroundColor: '#f3f4f6', borderRadius: '8px', marginBottom: '2rem', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#9ca3af' }}>
-              Featured Image (1200x630)
+            <div style={{ width: '100%', height: '450px', backgroundColor: '#f3f4f6', borderRadius: '8px', marginBottom: '2rem', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#9ca3af', overflow: 'hidden' }}>
+              {article.image_url ? (
+                <img src={article.image_url} alt={article.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              ) : (
+                'Featured Image (1200x630)'
+              )}
             </div>
 
             {/* Article Body */}
@@ -121,7 +125,9 @@ export default async function ArticlePage({ params }: { params: { slug: string }
                   <li key={item.id}>
                     <Link href={`/article/${item.slug}`}>
                       <div style={{ display: 'flex', gap: '0.75rem', borderBottom: idx !== arr.length - 1 ? '1px solid #f3f4f6' : 'none', paddingBottom: idx !== arr.length - 1 ? '1rem' : '0', cursor: 'pointer' }}>
-                        <div style={{ width: '80px', height: '60px', backgroundColor: '#e5e7eb', borderRadius: '4px', flexShrink: 0 }}></div>
+                        <div style={{ width: '80px', height: '60px', backgroundColor: '#e5e7eb', borderRadius: '4px', flexShrink: 0, overflow: 'hidden' }}>
+                          {item.image_url && <img src={item.image_url} alt={item.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
+                        </div>
                         <h4 style={{ fontSize: '0.9rem', fontWeight: 'bold', lineHeight: '1.3' }}>{item.title}</h4>
                       </div>
                     </Link>
@@ -151,7 +157,9 @@ export default async function ArticlePage({ params }: { params: { slug: string }
             {moreArticles.map((item: any) => (
               <Link key={item.id} href={`/article/${item.slug}`}>
                 <div style={{ cursor: 'pointer' }}>
-                  <div style={{ height: '160px', backgroundColor: '#e5e7eb', borderRadius: '6px', marginBottom: '0.75rem' }}></div>
+                  <div style={{ height: '160px', backgroundColor: '#e5e7eb', borderRadius: '6px', marginBottom: '0.75rem', overflow: 'hidden' }}>
+                    {item.image_url && <img src={item.image_url} alt={item.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
+                  </div>
                   <h4 style={{ fontSize: '1.1rem', fontWeight: 'bold', lineHeight: '1.3', marginBottom: '0.25rem' }}>{item.title}</h4>
                   <span style={{ fontSize: '0.8rem', color: 'var(--text-light)' }}>{item.date}</span>
                 </div>

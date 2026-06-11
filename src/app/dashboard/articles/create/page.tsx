@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import MediaPicker from '@/components/MediaPicker';
 import { useRouter } from 'next/navigation';
 
 interface Category {
@@ -25,6 +26,7 @@ export default function CreateArticlePage() {
   const [saving, setSaving] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
   const [message, setMessage] = useState('');
+  const [showMediaPicker, setShowMediaPicker] = useState(false);
 
   useEffect(() => {
     async function fetchCategories() {
@@ -247,6 +249,13 @@ export default function CreateArticlePage() {
                 <p style={{ color: '#9ca3af', fontSize: '0.75rem', marginTop: '0.5rem' }}>Recommended size: 1200x630px</p>
               </label>
             )}
+            
+            <button 
+              onClick={() => setShowMediaPicker(true)} 
+              style={{ width: '100%', marginTop: '1rem', padding: '0.75rem', backgroundColor: 'white', border: '1px solid var(--border-color)', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold', color: 'var(--text-dark)' }}
+            >
+              🖼️ Choose from Media Library
+            </button>
           </div>
 
           <div style={{ backgroundColor: 'white', padding: '1.5rem', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
@@ -262,6 +271,12 @@ export default function CreateArticlePage() {
           </div>
         </div>
       </div>
+      {showMediaPicker && (
+        <MediaPicker 
+          onSelect={(url) => { setImageUrl(url); setShowMediaPicker(false); }} 
+          onClose={() => setShowMediaPicker(false)} 
+        />
+      )}
     </div>
   );
 }

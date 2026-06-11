@@ -68,7 +68,9 @@ export default async function CategoryPage({ params }: { params: { slug: string 
                 {listArticles.map((article: any) => (
                   <Link key={article.id} href={`/article/${article.slug}`}>
                     <article style={{ display: 'flex', gap: '1.5rem', backgroundColor: 'white', padding: '1rem', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', cursor: 'pointer' }}>
-                      <div style={{ width: '200px', height: '140px', backgroundColor: '#e5e7eb', borderRadius: '4px', flexShrink: 0 }}></div>
+                      <div style={{ width: '200px', height: '140px', backgroundColor: '#e5e7eb', borderRadius: '4px', flexShrink: 0, overflow: 'hidden' }}>
+                        {article.image_url && <img src={article.image_url} alt={article.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
+                      </div>
                       <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
                         <h3 style={{ fontSize: '1.25rem', fontWeight: 'bold', marginBottom: '0.5rem', lineHeight: '1.3' }}>{article.title}</h3>
                         <p style={{ color: 'var(--text-light)', fontSize: '0.95rem', marginBottom: '1rem', lineHeight: '1.5' }}>{article.excerpt}</p>
@@ -95,7 +97,9 @@ export default async function CategoryPage({ params }: { params: { slug: string 
                     <li key={item.id}>
                       <Link href={`/article/${item.slug}`}>
                         <div style={{ display: 'flex', gap: '0.75rem', borderBottom: idx !== trending.length - 1 ? '1px solid #f3f4f6' : 'none', paddingBottom: idx !== trending.length - 1 ? '1rem' : '0', cursor: 'pointer' }}>
-                          <div style={{ width: '60px', height: '60px', backgroundColor: '#e5e7eb', borderRadius: '4px', flexShrink: 0 }}></div>
+                          <div style={{ width: '60px', height: '60px', backgroundColor: '#e5e7eb', borderRadius: '4px', flexShrink: 0, overflow: 'hidden' }}>
+                            {item.image_url && <img src={item.image_url} alt={item.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
+                          </div>
                           <h4 style={{ fontSize: '0.9rem', fontWeight: 'bold', lineHeight: '1.3' }}>{item.title}</h4>
                         </div>
                       </Link>
