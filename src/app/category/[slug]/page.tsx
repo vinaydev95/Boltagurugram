@@ -1,0 +1,118 @@
+import { Metadata } from 'next';
+import Header from '@/components/Header';
+import Footer from '@/components/Footer';
+import Link from 'next/link';
+import { getArticlesByCategoryDB, getCategoryBySlugDB, getTrendingArticlesDB } from '@/lib/db-queries';
+
+export const dynamic = 'force-dynamic';
+
+export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
+  const cat = await getCategoryBySlugDB(params.slug);
+  const name = cat?.name || params.slug.charAt(0).toUpperCase() + params.slug.slice(1);
+  return {
+    title: `${name} News | Live News`,
+    description: `Latest breaking news, updates, and analysis on ${name}. Stay updated with Live News.`,
+    openGraph: {
+      title: `${name} News | Live News`,
+      description: `Latest breaking news, updates, and analysis on ${name}. Stay updated with Live News.`,
+      url: `https://livenews.com/category/${params.slug}`,
+      siteName: 'Live News',
+    }
+  }
+}
+
+export default async function CategoryPage({ params }: { params: { slug: string } }) {
+  const cat = await getCategoryBySlugDB(params.slug);
+  const categoryName = cat?.name || params.slug.charAt(0).toUpperCase() + params.slug.slice(1);
+  const categoryArticles = await getArticlesByCategoryDB(params.slug, 20);
+  const trending = await getTrendingArticlesDB(4);
+  const featuredArticle = categoryArticles[0];
+  const listArticles = categoryArticles.slice(1);
+
+  return (
+    <div style={{ backgroundColor: 'var(--bg-color)', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+      <Header />
+
+      <main style={{ maxWidth: '1200px', margin: '2rem auto', padding: '0 1rem', flex: 1, width: '100%' }}>
+        <div style={{ borderBottom: '3px solid var(--primary-color)', paddingBottom: '1rem', marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <h1 style={{ fontSize: '2.5rem', fontWeight: '900', textTransform: 'uppercase' }}>{categoryName} NEWS</h1>
+          <span style={{ backgroundColor: '#e5e7eb', color: 'var(--text-light)', padding: '0.25rem 0.75rem', borderRadius: '20px', fontSize: '0.85rem', fontWeight: 'bold' }}>{categoryArticles.length} Articles</span>
+        </div>
+
+        {categoryArticles.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '4rem', backgroundColor: 'white', borderRadius: '8px' }}>
+            <h2 style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>No articles found in {categoryName}</h2>
+            <Link href="/" style={{ color: 'var(--primary-color)', fontWeight: 'bold' }}>← Back to Home</Link>
+          </div>
+        ) : (
+          <div style={{ display: 'grid', gridTemplateColumns: '3fr 1fr', gap: '3rem' }}>
+
+            {/* Main Category Feed */}
+            <section style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+
+              {/* Featured Category Story */}
+              {featuredArticle && (
+                <Link href={`/article/${featuredArticle.slug}`}>
+                  <div style={{ position: 'relative', borderRadius: '8px', overflow: 'hidden', height: '400px', backgroundColor: '#1f2937', cursor: 'pointer' }}>
+                    <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '2rem', background: 'linear-gradient(transparent, rgba(0,0,0,0.9))', color: 'white' }}>
+                      <h2 style={{ fontSize: '2rem', fontWeight: 'bold', marginBottom: '0.5rem', lineHeight: '1.2' }}>{featuredArticle.title}</h2>
+                      <p style={{ fontSize: '1rem', color: '#d1d5db', marginBottom: '1rem' }}>{featuredArticle.excerpt}</p>
+                      <span style={{ fontSize: '0.85rem', color: '#9ca3af' }}>By {featuredArticle.author} • {featuredArticle.date}</span>
+                    </div>
+                  </div>
+                </Link>
+              )}
+
+              {/* Article List */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                {listArticles.map((article: any) => (
+                  <Link key={article.id} href={`/article/${article.slug}`}>
+                    <article style={{ display: 'flex', gap: '1.5rem', backgroundColor: 'white', padding: '1rem', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', cursor: 'pointer' }}>
+                      <div style={{ width: '200px', height: '140px', backgroundColor: '#e5e7eb', borderRadius: '4px', flexShrink: 0 }}></div>
+                      <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                        <h3 style={{ fontSize: '1.25rem', fontWeight: 'bold', marginBottom: '0.5rem', lineHeight: '1.3' }}>{article.title}</h3>
+                        <p style={{ color: 'var(--text-light)', fontSize: '0.95rem', marginBottom: '1rem', lineHeight: '1.5' }}>{article.excerpt}</p>
+                        <div style={{ display: 'flex', gap: '1rem', fontSize: '0.8rem', color: '#9ca3af', fontWeight: '500' }}>
+                          <span>By {article.author}</span>
+                          <span>•</span>
+                          <span>{article.date}</span>
+                          <span>•</span>
+                          <span>{article.read_time} read</span>
+                        </div>
+                      </div>
+                    </article>
+                  </Link>
+                ))}
+              </div>
+            </section>
+
+            {/* Right Sidebar */}
+            <aside style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+              <div style={{ backgroundColor: 'white', borderRadius: '8px', padding: '1.5rem', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
+                <h3 style={{ fontSize: '1.2rem', fontWeight: 'bold', marginBottom: '1rem', borderBottom: '2px solid var(--primary-color)', paddingBottom: '0.5rem' }}>Trending</h3>
+                <ul style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                  {trending.map((item: any, idx: number) => (
+                    <li key={item.id}>
+                      <Link href={`/article/${item.slug}`}>
+                        <div style={{ display: 'flex', gap: '0.75rem', borderBottom: idx !== trending.length - 1 ? '1px solid #f3f4f6' : 'none', paddingBottom: idx !== trending.length - 1 ? '1rem' : '0', cursor: 'pointer' }}>
+                          <div style={{ width: '60px', height: '60px', backgroundColor: '#e5e7eb', borderRadius: '4px', flexShrink: 0 }}></div>
+                          <h4 style={{ fontSize: '0.9rem', fontWeight: 'bold', lineHeight: '1.3' }}>{item.title}</h4>
+                        </div>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div style={{ height: '300px', backgroundColor: '#f3f4f6', border: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#9ca3af', fontSize: '0.85rem' }}>
+                Sidebar Advertisement
+              </div>
+            </aside>
+          </div>
+        )}
+      </main>
+
+      <Footer />
+    </div>
+  );
+}
