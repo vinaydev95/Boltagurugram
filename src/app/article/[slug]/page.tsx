@@ -57,7 +57,7 @@ export default async function ArticlePage({ params }: { params: { slug: string }
       <main style={{ maxWidth: '1200px', margin: '2rem auto', padding: '0 1rem', flex: 1, width: '100%' }}>
 
         {/* Breadcrumb */}
-        <div style={{ fontSize: '0.85rem', color: 'var(--text-light)', marginBottom: '1.5rem', display: 'flex', gap: '0.5rem' }}>
+        <div style={{ fontSize: '0.85rem', color: 'var(--text-light)', marginBottom: '1.5rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
           <Link href="/">Home</Link>
           <span>/</span>
           <Link href={`/category/${catSlug}`}>{article.category_name}</Link>
@@ -65,7 +65,7 @@ export default async function ArticlePage({ params }: { params: { slug: string }
           <span style={{ color: 'var(--text-dark)' }}>{article.title}</span>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '3fr 1fr', gap: '3rem' }}>
+        <div className="grid-article">
 
           {/* Main Article Content */}
           <article style={{ backgroundColor: 'white', padding: '2.5rem', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
@@ -74,11 +74,11 @@ export default async function ArticlePage({ params }: { params: { slug: string }
               <span style={{ backgroundColor: 'var(--primary-color)', color: 'white', padding: '0.25rem 0.75rem', borderRadius: '4px', fontSize: '0.85rem', fontWeight: 'bold', textTransform: 'uppercase', marginBottom: '1rem', display: 'inline-block', cursor: 'pointer' }}>{article.category_name}</span>
             </Link>
 
-            <h1 style={{ fontSize: '3rem', fontWeight: '900', lineHeight: '1.1', marginBottom: '1.5rem', color: 'var(--text-dark)' }}>{article.title}</h1>
+            <h1 className="article-title">{article.title}</h1>
 
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--border-color)', borderBottom: '1px solid var(--border-color)', padding: '1rem 0', marginBottom: '2rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--border-color)', borderBottom: '1px solid var(--border-color)', padding: '1rem 0', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                <div style={{ width: '48px', height: '48px', borderRadius: '50%', backgroundColor: '#e5e7eb', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', color: 'var(--text-light)' }}>{article.author?.split(' ').map((n: string) => n[0]).join('')}</div>
+                <div style={{ width: '48px', height: '48px', borderRadius: '50%', backgroundColor: '#e5e7eb', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', color: 'var(--text-light)', flexShrink: 0 }}>{article.author?.split(' ').map((n: string) => n[0]).join('')}</div>
                 <div>
                   <p style={{ fontWeight: 'bold', margin: 0 }}>{article.author}</p>
                   <p style={{ color: 'var(--text-light)', fontSize: '0.85rem', margin: 0 }}>Published on {article.date} • {article.read_time} read</p>
@@ -94,7 +94,7 @@ export default async function ArticlePage({ params }: { params: { slug: string }
             </div>
 
             {/* Featured Image */}
-            <div style={{ width: '100%', height: '450px', backgroundColor: '#f3f4f6', borderRadius: '8px', marginBottom: '2rem', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#9ca3af', overflow: 'hidden' }}>
+            <div className="article-featured-img">
               {article.image_url ? (
                 <img src={article.image_url} alt={article.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               ) : (
@@ -144,7 +144,7 @@ export default async function ArticlePage({ params }: { params: { slug: string }
             <div style={{ backgroundColor: '#111827', color: 'white', borderRadius: '8px', padding: '1.5rem', textAlign: 'center' }}>
               <h3 style={{ fontSize: '1.2rem', fontWeight: 'bold', marginBottom: '0.5rem' }}>Never Miss an Update</h3>
               <p style={{ fontSize: '0.85rem', color: '#9ca3af', marginBottom: '1rem' }}>Get breaking news delivered straight to your inbox.</p>
-              <input type="email" placeholder="Email address" style={{ width: '100%', padding: '0.75rem', borderRadius: '4px', border: 'none', marginBottom: '0.5rem', outline: 'none' }} />
+              <input type="email" placeholder="Email address" style={{ width: '100%', padding: '0.75rem', borderRadius: '4px', border: 'none', marginBottom: '0.5rem', outline: 'none', boxSizing: 'border-box' }} />
               <button style={{ width: '100%', backgroundColor: 'var(--primary-color)', color: 'white', border: 'none', padding: '0.75rem', borderRadius: '4px', fontWeight: 'bold', cursor: 'pointer' }}>Subscribe</button>
             </div>
           </aside>
@@ -153,7 +153,7 @@ export default async function ArticlePage({ params }: { params: { slug: string }
         {/* More from category */}
         <section style={{ marginTop: '4rem', padding: '2rem', backgroundColor: 'white', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
           <h3 style={{ fontSize: '1.5rem', fontWeight: '900', borderBottom: '2px solid var(--text-dark)', paddingBottom: '0.5rem', marginBottom: '1.5rem' }}>More from {article.category_name}</h3>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1.5rem' }}>
+          <div className="grid-4col">
             {moreArticles.map((item: any) => (
               <Link key={item.id} href={`/article/${item.slug}`}>
                 <div style={{ cursor: 'pointer' }}>

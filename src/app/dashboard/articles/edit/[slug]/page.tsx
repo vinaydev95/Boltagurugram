@@ -144,12 +144,12 @@ export default function EditArticlePage({ params }: { params: { slug: string } }
 
   return (
     <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+      <div className="dashboard-header-actions" style={{ marginBottom: '2rem' }}>
         <div>
           <Link href="/dashboard/articles" style={{ color: 'var(--text-light)', fontSize: '0.9rem', marginBottom: '0.5rem', display: 'inline-block' }}>← Back to Articles</Link>
           <h1 style={{ fontSize: '2rem', fontWeight: 'bold' }}>Edit Article</h1>
         </div>
-        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
           {message && <span style={{ color: '#10b981', fontWeight: 'bold', fontSize: '0.9rem' }}>{message}</span>}
           <button onClick={() => saveArticle('Draft')} disabled={saving} style={{ padding: '0.75rem 1.5rem', borderRadius: '6px', border: '1px solid var(--border-color)', backgroundColor: 'white', fontWeight: 'bold', cursor: saving ? 'not-allowed' : 'pointer', opacity: saving ? 0.6 : 1 }}>
             {saving ? 'Saving...' : 'Save as Draft'}
@@ -160,7 +160,7 @@ export default function EditArticlePage({ params }: { params: { slug: string } }
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '2rem' }}>
+      <div className="dashboard-editor-grid">
         {/* Main Editor Section */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
           <div style={{ backgroundColor: 'white', padding: '1.5rem', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>

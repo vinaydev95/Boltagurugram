@@ -88,7 +88,7 @@ export default function ArticlesPage() {
 
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+      <div className="dashboard-header-actions">
         <h1 style={{ fontSize: '2rem', fontWeight: 'bold' }}>Manage Articles</h1>
         <Link href="/dashboard/articles/create" style={{ backgroundColor: 'var(--primary-color)', color: 'white', padding: '0.75rem 1.5rem', borderRadius: '6px', fontWeight: 'bold', boxShadow: '0 4px 6px rgba(229, 9, 20, 0.2)' }}>
           + Create New Article
@@ -96,13 +96,13 @@ export default function ArticlesPage() {
       </div>
 
       <div style={{ backgroundColor: 'white', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', overflow: 'hidden' }}>
-        <div style={{ padding: '1rem 1.5rem', borderBottom: '1px solid var(--border-color)', display: 'flex', gap: '1rem', backgroundColor: '#f9fafb' }}>
+        <div style={{ padding: '1rem 1.5rem', borderBottom: '1px solid var(--border-color)', display: 'flex', gap: '1rem', backgroundColor: '#f9fafb', flexWrap: 'wrap' }}>
           <input
             type="text"
             placeholder="Search articles..."
             value={search}
             onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-            style={{ padding: '0.5rem 1rem', borderRadius: '4px', border: '1px solid var(--border-color)', width: '300px', outline: 'none' }}
+            style={{ padding: '0.5rem 1rem', borderRadius: '4px', border: '1px solid var(--border-color)', width: '100%', maxWidth: '300px', outline: 'none', boxSizing: 'border-box' }}
           />
           <select
             value={categoryFilter}
@@ -119,7 +119,8 @@ export default function ArticlesPage() {
         {loading ? (
           <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-light)' }}>Loading articles...</div>
         ) : (
-          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+          <div className="table-scroll-wrapper">
+          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '700px' }}>
             <thead>
               <tr style={{ borderBottom: '2px solid var(--border-color)', color: 'var(--text-light)', backgroundColor: '#f9fafb' }}>
                 <th style={{ padding: '1rem 1.5rem' }}>Title</th>
@@ -161,6 +162,7 @@ export default function ArticlesPage() {
               )}
             </tbody>
           </table>
+          </div>
         )}
 
         <div style={{ padding: '1rem 1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--border-color)', color: 'var(--text-light)', fontSize: '0.9rem' }}>

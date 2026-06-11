@@ -3,7 +3,7 @@ import Link from 'next/link';
 export default function Footer() {
   return (
     <footer style={{ backgroundColor: '#111827', color: 'white', padding: '4rem 1rem 2rem 1rem', marginTop: '4rem' }}>
-      <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '3rem', borderBottom: '1px solid #374151', paddingBottom: '3rem' }}>
+      <div className="footer-grid">
 
         <div>
           <Link href="/"><h2 style={{ fontSize: '2rem', fontWeight: '900', color: 'var(--primary-color)', marginBottom: '1rem' }}>LIVE NEWS</h2></Link>
@@ -45,7 +45,7 @@ export default function Footer() {
           <p style={{ color: '#9ca3af', fontSize: '0.85rem', marginTop: '1.5rem' }}>Subscribe to our newsletter for daily updates.</p>
           <div style={{ display: 'flex', marginTop: '0.5rem' }}>
             <input type="email" placeholder="Your email..." style={{ padding: '0.5rem', borderRadius: '4px 0 0 4px', border: 'none', outline: 'none', width: '100%' }} />
-            <button style={{ backgroundColor: 'var(--primary-color)', color: 'white', border: 'none', padding: '0.5rem 1rem', borderRadius: '0 4px 4px 0', fontWeight: 'bold', cursor: 'pointer' }}>Subscribe</button>
+            <button style={{ backgroundColor: 'var(--primary-color)', color: 'white', border: 'none', padding: '0.5rem 1rem', borderRadius: '0 4px 4px 0', fontWeight: 'bold', cursor: 'pointer', flexShrink: 0 }}>Subscribe</button>
           </div>
         </div>
 

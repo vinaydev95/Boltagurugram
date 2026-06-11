@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useAuth } from '@/lib/AuthContext';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 export default function DashboardLayout({
   children,
@@ -12,6 +12,7 @@ export default function DashboardLayout({
 }) {
   const { user, isLoading, logout } = useAuth();
   const router = useRouter();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
     if (!isLoading && !user) {
@@ -38,20 +39,38 @@ export default function DashboardLayout({
   if (!user) return null;
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: 'var(--bg-color)' }}>
+    <div className="dashboard-layout">
+      {/* Mobile overlay */}
+      {sidebarOpen && (
+        <div 
+          onClick={() => setSidebarOpen(false)} 
+          style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 200 }} 
+        />
+      )}
+
       {/* Sidebar */}
-      <aside style={{ width: '250px', backgroundColor: '#111827', color: 'white', padding: '2rem 1rem' }}>
-        <h2 style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '2rem', textAlign: 'center', color: 'var(--primary-color)' }}>News CMS</h2>
+      <aside className={`dashboard-sidebar ${sidebarOpen ? 'open' : ''}`}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+          <h2 style={{ fontSize: '1.5rem', fontWeight: 'bold', textAlign: 'center', color: 'var(--primary-color)', flex: 1 }}>News CMS</h2>
+          {/* Close button visible only on mobile via inline media check */}
+          <button 
+            className="show-mobile" 
+            onClick={() => setSidebarOpen(false)} 
+            style={{ background: 'none', border: 'none', color: 'white', fontSize: '1.5rem', cursor: 'pointer' }}
+          >
+            ✕
+          </button>
+        </div>
         <nav>
           <ul style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            <li><Link href="/dashboard" style={{ display: 'block', padding: '0.75rem 1rem', borderRadius: '4px', backgroundColor: '#374151' }}>Overview</Link></li>
-            <li><Link href="/dashboard/articles" style={{ display: 'block', padding: '0.75rem 1rem', borderRadius: '4px' }}>Articles</Link></li>
-            <li><Link href="/dashboard/categories" style={{ display: 'block', padding: '0.75rem 1rem', borderRadius: '4px' }}>Categories</Link></li>
-            <li><Link href="/dashboard/media" style={{ display: 'block', padding: '0.75rem 1rem', borderRadius: '4px' }}>Media</Link></li>
-            <li><Link href="/" style={{ display: 'block', padding: '0.75rem 1rem', borderRadius: '4px', marginTop: '2rem', color: '#9ca3af' }}>← View Site</Link></li>
+            <li><Link href="/dashboard" onClick={() => setSidebarOpen(false)} style={{ display: 'block', padding: '0.75rem 1rem', borderRadius: '4px', backgroundColor: '#374151' }}>Overview</Link></li>
+            <li><Link href="/dashboard/articles" onClick={() => setSidebarOpen(false)} style={{ display: 'block', padding: '0.75rem 1rem', borderRadius: '4px' }}>Articles</Link></li>
+            <li><Link href="/dashboard/categories" onClick={() => setSidebarOpen(false)} style={{ display: 'block', padding: '0.75rem 1rem', borderRadius: '4px' }}>Categories</Link></li>
+            <li><Link href="/dashboard/media" onClick={() => setSidebarOpen(false)} style={{ display: 'block', padding: '0.75rem 1rem', borderRadius: '4px' }}>Media</Link></li>
+            <li><Link href="/" onClick={() => setSidebarOpen(false)} style={{ display: 'block', padding: '0.75rem 1rem', borderRadius: '4px', marginTop: '2rem', color: '#9ca3af' }}>← View Site</Link></li>
             <li>
               <button
-                onClick={logout}
+                onClick={() => { logout(); setSidebarOpen(false); }}
                 style={{
                   display: 'block',
                   width: '100%',
@@ -73,8 +92,13 @@ export default function DashboardLayout({
         </nav>
       </aside>
 
+      {/* Mobile sidebar toggle button */}
+      <button className="dashboard-sidebar-toggle" onClick={() => setSidebarOpen(!sidebarOpen)}>
+        ☰
+      </button>
+
       {/* Main Content */}
-      <main style={{ flex: 1, padding: '2rem', overflowY: 'auto' }}>
+      <main style={{ flex: 1, padding: '2rem', overflowY: 'auto', minWidth: 0 }}>
         <header style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '2rem', paddingBottom: '1rem', borderBottom: '1px solid var(--border-color)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
             <span>{user.name} ({user.role})</span>

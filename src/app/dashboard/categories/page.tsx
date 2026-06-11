@@ -79,7 +79,7 @@ export default function CategoriesPage() {
 
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+      <div className="dashboard-header-actions">
         <h1 style={{ fontSize: '2rem', fontWeight: 'bold' }}>Categories</h1>
         <button onClick={() => setShowModal(true)} style={{ padding: '0.75rem 1.5rem', borderRadius: '6px', border: 'none', backgroundColor: 'var(--primary-color)', color: 'white', fontWeight: 'bold', cursor: 'pointer', boxShadow: '0 4px 6px rgba(229, 9, 20, 0.2)' }}>
           + Add Category
@@ -89,7 +89,7 @@ export default function CategoriesPage() {
       {/* Add Category Modal */}
       {showModal && (
         <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
-          <div style={{ backgroundColor: 'white', padding: '2rem', borderRadius: '8px', width: '400px', boxShadow: '0 10px 30px rgba(0,0,0,0.2)' }}>
+          <div style={{ backgroundColor: 'white', padding: '2rem', borderRadius: '8px', width: '90%', maxWidth: '400px', boxShadow: '0 10px 30px rgba(0,0,0,0.2)' }}>
             <h2 style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '1.5rem' }}>Add New Category</h2>
             <input
               type="text"
@@ -118,7 +118,8 @@ export default function CategoriesPage() {
       )}
 
       <div style={{ backgroundColor: 'white', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', overflow: 'hidden' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+        <div className="table-scroll-wrapper">
+        <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '500px' }}>
           <thead>
             <tr style={{ backgroundColor: '#f9fafb', borderBottom: '1px solid var(--border-color)', textAlign: 'left' }}>
               <th style={{ padding: '1rem 1.5rem', fontWeight: '600', color: 'var(--text-light)' }}>Name</th>
@@ -145,6 +146,7 @@ export default function CategoriesPage() {
             ))}
           </tbody>
         </table>
+        </div>
       </div>
     </div>
   );

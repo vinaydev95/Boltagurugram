@@ -88,9 +88,9 @@ export default function MediaPage() {
 
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+      <div className="dashboard-header-actions">
         <h1 style={{ fontSize: '2rem', fontWeight: 'bold' }}>Media Library</h1>
-        <div style={{ display: 'flex', gap: '1rem' }}>
+        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
           <div style={{ display: 'flex', border: '1px solid var(--border-color)', borderRadius: '6px', overflow: 'hidden' }}>
             <button onClick={() => setViewMode('grid')} style={{ padding: '0.5rem 1rem', border: 'none', backgroundColor: viewMode === 'grid' ? 'var(--primary-color)' : 'white', color: viewMode === 'grid' ? 'white' : 'var(--text-dark)', cursor: 'pointer', fontWeight: 'bold' }}>Grid</button>
             <button onClick={() => setViewMode('list')} style={{ padding: '0.5rem 1rem', border: 'none', backgroundColor: viewMode === 'list' ? 'var(--primary-color)' : 'white', color: viewMode === 'list' ? 'white' : 'var(--text-dark)', cursor: 'pointer', fontWeight: 'bold' }}>List</button>
@@ -102,7 +102,7 @@ export default function MediaPage() {
       </div>
 
       {viewMode === 'grid' ? (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1.5rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: '1.5rem' }}>
           {files.map((file) => (
             <div key={file.id} style={{ backgroundColor: 'white', borderRadius: '8px', overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', position: 'relative' }}>
               <div style={{ height: '140px', backgroundColor: '#e5e7eb', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
@@ -125,7 +125,8 @@ export default function MediaPage() {
         </div>
       ) : (
         <div style={{ backgroundColor: 'white', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', overflow: 'hidden' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+          <div className="table-scroll-wrapper">
+          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '600px' }}>
             <thead>
               <tr style={{ backgroundColor: '#f9fafb', borderBottom: '1px solid var(--border-color)' }}>
                 <th style={{ padding: '1rem 1.5rem', color: 'var(--text-light)' }}>File Name</th>
@@ -149,6 +150,7 @@ export default function MediaPage() {
               ))}
             </tbody>
           </table>
+          </div>
         </div>
       )}
 

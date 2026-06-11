@@ -36,15 +36,15 @@ export default async function Home() {
       <main style={{ maxWidth: '1200px', margin: '2rem auto', padding: '0 1rem', flex: 1, width: '100%' }}>
 
         {/* Top Grid: Hero Section + Side Trending */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 350px', gap: '2rem', marginBottom: '3rem' }}>
+        <div className="grid-hero">
 
           {/* Main Hero Story */}
           <section>
             <Link href={`/article/${heroArticle.slug}`}>
-              <div style={{ position: 'relative', borderRadius: '8px', overflow: 'hidden', height: '500px', backgroundColor: '#1f2937', cursor: 'pointer', backgroundImage: heroArticle.image_url ? `url(${heroArticle.image_url})` : 'none', backgroundSize: 'cover', backgroundPosition: 'center' }}>
+              <div className="hero-section" style={{ backgroundImage: heroArticle.image_url ? `url(${heroArticle.image_url})` : 'none' }}>
                 <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '2rem', background: 'linear-gradient(transparent, rgba(0,0,0,0.9))', color: 'white' }}>
                   <span style={{ backgroundColor: 'var(--primary-color)', padding: '0.3rem 0.6rem', borderRadius: '4px', fontSize: '0.8rem', fontWeight: 'bold', textTransform: 'uppercase', marginBottom: '1rem', display: 'inline-block' }}>{heroArticle.category_name} Breaking</span>
-                  <h2 style={{ fontSize: '2.5rem', fontWeight: 'bold', marginBottom: '0.5rem', lineHeight: '1.2' }}>{heroArticle.title}</h2>
+                  <h2 className="hero-title">{heroArticle.title}</h2>
                   <p style={{ fontSize: '1.1rem', color: '#d1d5db', marginBottom: '1rem' }}>{heroArticle.excerpt}</p>
                   <span style={{ fontSize: '0.85rem', color: '#9ca3af' }}>By {heroArticle.author} • {heroArticle.date}</span>
                 </div>
@@ -52,7 +52,7 @@ export default async function Home() {
             </Link>
 
             {/* Secondary Hero Stories */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginTop: '1rem' }}>
+            <div className="grid-2col">
               {secondaryArticles.map((article: any) => (
                 <Link key={article.id} href={`/article/${article.slug}`}>
                   <div style={{ backgroundColor: 'white', borderRadius: '8px', overflow: 'hidden', display: 'flex', gap: '1rem', padding: '1rem', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', cursor: 'pointer' }}>
@@ -100,7 +100,7 @@ export default async function Home() {
         {/* Latest News Grid */}
         <section style={{ marginBottom: '3rem' }}>
           <h3 style={{ fontSize: '1.5rem', fontWeight: '900', borderBottom: '2px solid var(--text-dark)', paddingBottom: '0.5rem', marginBottom: '1.5rem' }}>LATEST NEWS</h3>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1.5rem' }}>
+          <div className="grid-4col">
             {latest.slice(3, 7).map((article: any) => (
               <Link key={article.id} href={`/article/${article.slug}`}>
                 <div style={{ backgroundColor: 'white', borderRadius: '8px', overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', cursor: 'pointer' }}>
@@ -127,7 +127,7 @@ export default async function Home() {
               SPORTS
               <Link href="/category/sports"><span style={{ fontSize: '0.85rem', fontWeight: 'normal', color: 'var(--primary-color)', cursor: 'pointer' }}>View All →</span></Link>
             </h3>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1.5rem' }}>
+            <div className="grid-4col">
               {(sportsArticles.length > 0 ? sportsArticles : latest.slice(0, 4)).map((article: any) => (
                 <Link key={article.id} href={`/article/${article.slug}`}>
                   <div style={{ backgroundColor: 'white', borderRadius: '8px', overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', cursor: 'pointer' }}>
@@ -150,7 +150,7 @@ export default async function Home() {
               CRIME
               <Link href="/category/crime"><span style={{ fontSize: '0.85rem', fontWeight: 'normal', color: 'var(--primary-color)', cursor: 'pointer' }}>View All →</span></Link>
             </h3>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1.5rem' }}>
+            <div className="grid-4col">
               {(crimeArticles.length > 0 ? crimeArticles : latest.slice(0, 4)).map((article: any) => (
                 <Link key={article.id} href={`/article/${article.slug}`}>
                   <div style={{ backgroundColor: 'white', borderRadius: '8px', overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', cursor: 'pointer' }}>
@@ -173,7 +173,7 @@ export default async function Home() {
               POLITICAL
               <Link href="/category/political"><span style={{ fontSize: '0.85rem', fontWeight: 'normal', color: 'var(--primary-color)', cursor: 'pointer' }}>View All →</span></Link>
             </h3>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1.5rem' }}>
+            <div className="grid-4col">
               {(politicalArticles.length > 0 ? politicalArticles : latest.slice(0, 4)).map((article: any) => (
                 <Link key={article.id} href={`/article/${article.slug}`}>
                   <div style={{ backgroundColor: 'white', borderRadius: '8px', overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', cursor: 'pointer' }}>

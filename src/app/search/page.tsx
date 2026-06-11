@@ -23,8 +23,8 @@ export default async function SearchPage({ searchParams }: { searchParams: { q?:
       <Header />
 
       <main style={{ maxWidth: '1200px', margin: '2rem auto', padding: '0 1rem', flex: 1, width: '100%' }}>
-        <div style={{ borderBottom: '3px solid var(--primary-color)', paddingBottom: '1rem', marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <h1 style={{ fontSize: '2.5rem', fontWeight: '900', textTransform: 'uppercase' }}>SEARCH RESULTS</h1>
+        <div style={{ borderBottom: '3px solid var(--primary-color)', paddingBottom: '1rem', marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+          <h1 className="page-title">SEARCH RESULTS</h1>
           {query && <span style={{ backgroundColor: '#e5e7eb', color: 'var(--text-light)', padding: '0.25rem 0.75rem', borderRadius: '20px', fontSize: '0.85rem', fontWeight: 'bold' }}>{articles.length} Results for &quot;{query}&quot;</span>}
         </div>
 
@@ -41,15 +41,15 @@ export default async function SearchPage({ searchParams }: { searchParams: { q?:
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', maxWidth: '800px', margin: '0 auto' }}>
             {articles.map((article: any) => (
               <Link key={article.id} href={`/article/${article.slug}`}>
-                <article style={{ display: 'flex', gap: '1.5rem', backgroundColor: 'white', padding: '1.5rem', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', cursor: 'pointer' }}>
-                  <div style={{ width: '240px', height: '160px', backgroundColor: '#e5e7eb', borderRadius: '4px', flexShrink: 0, overflow: 'hidden' }}>
+                <article className="search-article">
+                  <div className="search-article-img">
                     {article.image_url && <img src={article.image_url} alt={article.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
                     <span style={{ color: 'var(--primary-color)', fontSize: '0.8rem', fontWeight: 'bold', textTransform: 'uppercase', marginBottom: '0.5rem' }}>{article.category_name}</span>
                     <h3 style={{ fontSize: '1.4rem', fontWeight: 'bold', marginBottom: '0.75rem', lineHeight: '1.3' }}>{article.title}</h3>
                     <p style={{ color: 'var(--text-light)', fontSize: '1rem', marginBottom: '1rem', lineHeight: '1.5' }}>{article.excerpt}</p>
-                    <div style={{ display: 'flex', gap: '1rem', fontSize: '0.85rem', color: '#9ca3af', fontWeight: '500' }}>
+                    <div style={{ display: 'flex', gap: '1rem', fontSize: '0.85rem', color: '#9ca3af', fontWeight: '500', flexWrap: 'wrap' }}>
                       <span>By {article.author}</span>
                       <span>•</span>
                       <span>{article.date}</span>
