@@ -9,8 +9,8 @@ export const dynamic = 'force-dynamic';
 export async function generateMetadata({ searchParams }: { searchParams: { q?: string } }): Promise<Metadata> {
   const query = searchParams.q || '';
   return {
-    title: `Search Results for "${query}" | Live News`,
-    description: `Search results for ${query} on Live News.`,
+    title: `Search Results for "${query}" | Bolta Gurugram`,
+    description: `Search results for ${query} on Bolta Gurugram.`,
   }
 }
 

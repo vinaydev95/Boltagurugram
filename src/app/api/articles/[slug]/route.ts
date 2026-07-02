@@ -72,15 +72,9 @@ export async function PUT(
     if (title !== undefined) {
       updates.push('title = ?');
       updateParams.push(title);
-      // Update slug if title changes
-      const newSlug = title
-        .toLowerCase()
-        .replace(/[^a-z0-9\s-]/g, '')
-        .replace(/\s+/g, '-')
-        .replace(/-+/g, '-')
-        .substring(0, 200);
-      updates.push('slug = ?');
-      updateParams.push(newSlug);
+      // NOTE: Slug is intentionally NOT updated when title changes.
+      // Changing the slug would break existing links and can cause
+      // duplicate key errors with non-ASCII (e.g. Hindi) titles.
     }
     if (excerpt !== undefined) { updates.push('excerpt = ?'); updateParams.push(excerpt); }
     if (content !== undefined) { updates.push('content = ?'); updateParams.push(content); }

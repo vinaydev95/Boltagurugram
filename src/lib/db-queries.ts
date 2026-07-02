@@ -166,7 +166,7 @@ export async function getCategoriesDB() {
      FROM categories c
      LEFT JOIN articles a ON c.id = a.category_id AND a.status = 'Published'
      GROUP BY c.id
-     ORDER BY c.name ASC`
+     ORDER BY c.sort_order ASC, c.name ASC`
   );
   return rows;
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import MediaPicker from '@/components/MediaPicker';
 import { useRouter } from 'next/navigation';
@@ -27,6 +27,8 @@ export default function CreateArticlePage() {
   const [uploadingImage, setUploadingImage] = useState(false);
   const [message, setMessage] = useState('');
   const [showMediaPicker, setShowMediaPicker] = useState(false);
+  const [showInlineImagePicker, setShowInlineImagePicker] = useState(false);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     async function fetchCategories() {
@@ -40,6 +42,50 @@ export default function CreateArticlePage() {
     }
     fetchCategories();
   }, []);
+
+  const insertInlineImage = (url: string) => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const imgHtml = `\n<figure style="margin: 1.5rem 0; text-align: center;"><img src="${url}" alt="Article image" style="max-width: 100%; border-radius: 8px; display: block; margin: 0 auto;" /></figure>\n`;
+    const newContent = content.substring(0, start) + imgHtml + content.substring(end);
+    setContent(newContent);
+    // Restore cursor after inserted image
+    setTimeout(() => {
+      textarea.selectionStart = start + imgHtml.length;
+      textarea.selectionEnd = start + imgHtml.length;
+      textarea.focus();
+    }, 0);
+  };
+
+  const applyFormat = (tag: string) => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const selected = content.substring(start, end);
+    const placeholder = selected || 'text here';
+    let wrapped = '';
+    if (tag === 'b') wrapped = `<strong>${placeholder}</strong>`;
+    else if (tag === 'i') wrapped = `<em>${placeholder}</em>`;
+    else if (tag === 'u') wrapped = `<u>${placeholder}</u>`;
+    else if (tag === 'h2') wrapped = `\n<h2>${placeholder}</h2>\n`;
+    else if (tag === 'h3') wrapped = `\n<h3>${placeholder}</h3>\n`;
+    else if (tag === 'quote') wrapped = `\n<blockquote style="border-left:4px solid #e50914;padding:1rem 1.5rem;margin:1.5rem 0;background:#fef2f2;font-style:italic;">${placeholder}</blockquote>\n`;
+    else if (tag === 'link') {
+      const url = window.prompt('Enter URL:', 'https://');
+      if (!url) return;
+      wrapped = `<a href="${url}" target="_blank" rel="noopener noreferrer">${placeholder}</a>`;
+    }
+    const newContent = content.substring(0, start) + wrapped + content.substring(end);
+    setContent(newContent);
+    setTimeout(() => {
+      textarea.selectionStart = start + wrapped.length;
+      textarea.selectionEnd = start + wrapped.length;
+      textarea.focus();
+    }, 0);
+  };
 
   const saveArticle = async (status: 'Draft' | 'Published') => {
     if (!headline) {
@@ -61,7 +107,7 @@ export default function CreateArticlePage() {
         body: JSON.stringify({
           title: headline,
           excerpt: excerpt || headline.substring(0, 150),
-          content: `<p>${content.replace(/\n\n/g, '</p><p>').replace(/\n/g, '<br/>')}</p>`,
+          content: content,
           category_id: categoryId ? parseInt(categoryId) : null,
           image_url: imageUrl || null,
           author: 'Admin',
@@ -171,13 +217,43 @@ export default function CreateArticlePage() {
 
             {activeTab === 'write' ? (
               <div style={{ padding: '1.5rem' }}>
-                <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem', paddingBottom: '1rem', borderBottom: '1px solid var(--border-color)' }}>
-                  {['B', 'I', 'U', 'H2', 'H3', '"', '🔗', '📷'].map(tool => (
-                    <button key={tool} style={{ width: '32px', height: '32px', border: '1px solid var(--border-color)', borderRadius: '4px', background: 'white', cursor: 'pointer', fontWeight: 'bold' }}>{tool}</button>
+                <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem', paddingBottom: '1rem', borderBottom: '1px solid var(--border-color)', flexWrap: 'wrap', alignItems: 'center' }}>
+                  {[
+                    { label: 'B', tag: 'b', title: 'Bold', style: { fontWeight: 'bold' } },
+                    { label: 'I', tag: 'i', title: 'Italic', style: { fontStyle: 'italic' } },
+                    { label: 'U', tag: 'u', title: 'Underline', style: { textDecoration: 'underline' } },
+                    { label: 'H2', tag: 'h2', title: 'Heading 2', style: { fontWeight: 'bold' } },
+                    { label: 'H3', tag: 'h3', title: 'Heading 3', style: { fontWeight: 'bold' } },
+                    { label: '"', tag: 'quote', title: 'Blockquote', style: {} },
+                    { label: '🔗', tag: 'link', title: 'Insert Link', style: {} },
+                  ].map(tool => (
+                    <button
+                      key={tool.tag}
+                      type="button"
+                      title={tool.title}
+                      onMouseDown={(e) => {
+                        e.preventDefault();
+                        applyFormat(tool.tag);
+                      }}
+                      style={{ width: '32px', height: '32px', border: '1px solid var(--border-color)', borderRadius: '4px', background: 'white', cursor: 'pointer', ...tool.style }}
+                    >{tool.label}</button>
                   ))}
+                  <button
+                    type="button"
+                    title="Insert image between paragraphs"
+                    onMouseDown={(e) => {
+                      e.preventDefault();
+                      setShowInlineImagePicker(true);
+                    }}
+                    style={{ padding: '0 10px', height: '32px', border: '1px solid var(--primary-color)', borderRadius: '4px', background: '#fef2f2', cursor: 'pointer', fontWeight: 'bold', color: 'var(--primary-color)', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '4px' }}
+                  >
+                    📷 Insert Image
+                  </button>
+                  <span style={{ fontSize: '0.75rem', color: '#9ca3af', marginLeft: '0.5rem' }}>Place cursor where you want the image, then click Insert Image</span>
                 </div>
                 <textarea
-                  placeholder="Write the article content here..."
+                  ref={textareaRef}
+                  placeholder="Write the article content here...\n\nTip: Place your cursor between paragraphs and click '📷 Insert Image' to add an image inline."
                   value={content}
                   onChange={(e) => setContent(e.target.value)}
                   style={{ width: '100%', minHeight: '400px', padding: '1rem', border: '1px solid var(--border-color)', borderRadius: '6px', resize: 'vertical', fontFamily: 'inherit', fontSize: '1rem', lineHeight: '1.6', outline: 'none', boxSizing: 'border-box' }}
@@ -188,7 +264,7 @@ export default function CreateArticlePage() {
                 {content ? (
                   <div>
                     <h1 style={{ fontSize: '2rem', fontWeight: 'bold', marginBottom: '1rem' }}>{headline || 'Untitled'}</h1>
-                    <div style={{ fontSize: '1.1rem', lineHeight: '1.8', color: '#374151', whiteSpace: 'pre-wrap' }}>{content}</div>
+                    <div style={{ fontSize: '1.1rem', lineHeight: '1.8', color: '#374151' }} dangerouslySetInnerHTML={{ __html: content.includes('<') ? content : `<p>${content.replace(/\n\n/g, '</p><p>').replace(/\n/g, '<br/>')}</p>` }} />
                   </div>
                 ) : (
                   <p style={{ color: 'var(--text-light)', fontStyle: 'italic', textAlign: 'center', marginTop: '4rem' }}>Start writing to see a preview...</p>
@@ -275,6 +351,12 @@ export default function CreateArticlePage() {
         <MediaPicker 
           onSelect={(url) => { setImageUrl(url); setShowMediaPicker(false); }} 
           onClose={() => setShowMediaPicker(false)} 
+        />
+      )}
+      {showInlineImagePicker && (
+        <MediaPicker
+          onSelect={(url) => { insertInlineImage(url); setShowInlineImagePicker(false); }}
+          onClose={() => setShowInlineImagePicker(false)}
         />
       )}
     </div>

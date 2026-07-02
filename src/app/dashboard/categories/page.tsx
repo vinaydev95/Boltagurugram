@@ -17,6 +17,10 @@ export default function CategoriesPage() {
   const [newColor, setNewColor] = useState('#6b7280');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  
+  // Drag and drop state
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
 
   useEffect(() => {
     fetchCategories();
@@ -73,14 +77,90 @@ export default function CategoriesPage() {
     }
   };
 
+  // Reorder database execution
+  const saveReorder = async (updatedCats: Category[]) => {
+    const orderedIds = updatedCats.map(c => c.id);
+    try {
+      const res = await fetch('/api/categories', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderedIds }),
+      });
+      const data = await res.json();
+      if (!data.success) {
+        console.error('Failed to save order to database:', data.error);
+        fetchCategories(); // rollback on error
+      }
+    } catch (err) {
+      console.error('Error saving reorder:', err);
+      fetchCategories(); // rollback
+    }
+  };
+
+  // Move up/down handlers
+  const moveUp = (index: number) => {
+    if (index === 0) return;
+    const newCats = [...cats];
+    const temp = newCats[index];
+    newCats[index] = newCats[index - 1];
+    newCats[index - 1] = temp;
+    setCats(newCats);
+    saveReorder(newCats);
+  };
+
+  const moveDown = (index: number) => {
+    if (index === cats.length - 1) return;
+    const newCats = [...cats];
+    const temp = newCats[index];
+    newCats[index] = newCats[index + 1];
+    newCats[index + 1] = temp;
+    setCats(newCats);
+    saveReorder(newCats);
+  };
+
+  // Drag and drop events
+  const handleDragStart = (index: number) => {
+    setDraggedIndex(index);
+  };
+
+  const handleDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    if (index !== dragOverIndex) {
+      setDragOverIndex(index);
+    }
+  };
+
+  const handleDrop = (index: number) => {
+    if (draggedIndex === null || draggedIndex === index) return;
+    
+    const reorderedCats = [...cats];
+    const [draggedItem] = reorderedCats.splice(draggedIndex, 1);
+    reorderedCats.splice(index, 0, draggedItem);
+    
+    setCats(reorderedCats);
+    saveReorder(reorderedCats);
+    setDraggedIndex(null);
+    setDragOverIndex(null);
+  };
+
+  const handleDragEnd = () => {
+    setDraggedIndex(null);
+    setDragOverIndex(null);
+  };
+
   if (loading) {
     return <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-light)' }}>Loading categories...</div>;
   }
 
   return (
     <div>
-      <div className="dashboard-header-actions">
-        <h1 style={{ fontSize: '2rem', fontWeight: 'bold' }}>Categories</h1>
+      <div className="dashboard-header-actions" style={{ marginBottom: '2rem' }}>
+        <div>
+          <h1 style={{ fontSize: '2rem', fontWeight: 'bold' }}>Categories</h1>
+          <p style={{ color: 'var(--text-light)', fontSize: '0.9rem', marginTop: '0.25rem' }}>
+            Drag and drop rows or use the arrow buttons to customize the menu order of categories.
+          </p>
+        </div>
         <button onClick={() => setShowModal(true)} style={{ padding: '0.75rem 1.5rem', borderRadius: '6px', border: 'none', backgroundColor: 'var(--primary-color)', color: 'white', fontWeight: 'bold', cursor: 'pointer', boxShadow: '0 4px 6px rgba(229, 9, 20, 0.2)' }}>
           + Add Category
         </button>
@@ -119,33 +199,51 @@ export default function CategoriesPage() {
 
       <div style={{ backgroundColor: 'white', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', overflow: 'hidden' }}>
         <div className="table-scroll-wrapper">
-        <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '500px' }}>
-          <thead>
-            <tr style={{ backgroundColor: '#f9fafb', borderBottom: '1px solid var(--border-color)', textAlign: 'left' }}>
-              <th style={{ padding: '1rem 1.5rem', fontWeight: '600', color: 'var(--text-light)' }}>Name</th>
-              <th style={{ padding: '1rem 1.5rem', fontWeight: '600', color: 'var(--text-light)' }}>Slug</th>
-              <th style={{ padding: '1rem 1.5rem', fontWeight: '600', color: 'var(--text-light)' }}>Total Articles</th>
-              <th style={{ padding: '1rem 1.5rem', fontWeight: '600', color: 'var(--text-light)', textAlign: 'right' }}>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {cats.map((cat) => (
-              <tr key={cat.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
-                <td style={{ padding: '1rem 1.5rem', fontWeight: '500' }}>
-                  <span style={{ display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%', backgroundColor: cat.color, marginRight: '0.5rem' }}></span>
-                  {cat.name}
-                </td>
-                <td style={{ padding: '1rem 1.5rem', color: 'var(--text-light)' }}>/{cat.slug}</td>
-                <td style={{ padding: '1rem 1.5rem' }}>
-                  <span style={{ backgroundColor: '#f3f4f6', padding: '0.2rem 0.6rem', borderRadius: '20px', fontSize: '0.85rem', fontWeight: 'bold' }}>{cat.article_count}</span>
-                </td>
-                <td style={{ padding: '1rem 1.5rem', textAlign: 'right' }}>
-                  <button onClick={() => handleDelete(cat.id)} style={{ background: 'none', border: 'none', color: 'var(--primary-color)', cursor: 'pointer', fontWeight: 'bold' }}>Delete</button>
-                </td>
+          <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '500px' }}>
+            <thead>
+              <tr style={{ backgroundColor: '#f9fafb', borderBottom: '1px solid var(--border-color)', textAlign: 'left' }}>
+                <th style={{ padding: '1rem 1.5rem', fontWeight: '600', color: 'var(--text-light)' }}>Name</th>
+                <th style={{ padding: '1rem 1.5rem', fontWeight: '600', color: 'var(--text-light)' }}>Slug</th>
+                <th style={{ padding: '1rem 1.5rem', fontWeight: '600', color: 'var(--text-light)' }}>Total Articles</th>
+                <th style={{ padding: '1rem 1.5rem', fontWeight: '600', color: 'var(--text-light)', textAlign: 'right' }}>Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {cats.map((cat, index) => {
+                const isDragging = draggedIndex === index;
+                const isOver = dragOverIndex === index;
+                return (
+                  <tr
+                    key={cat.id}
+                    draggable
+                    onDragStart={() => handleDragStart(index)}
+                    onDragOver={(e) => handleDragOver(e, index)}
+                    onDrop={() => handleDrop(index)}
+                    onDragEnd={handleDragEnd}
+                    style={{
+                      borderBottom: '1px solid var(--border-color)',
+                      cursor: 'grab',
+                      opacity: isDragging ? 0.4 : 1,
+                      backgroundColor: isOver ? '#fef2f2' : isDragging ? '#f9fafb' : 'transparent',
+                      transition: 'background-color 0.15s, opacity 0.15s',
+                    }}
+                  >
+                    <td style={{ padding: '1rem 1.5rem', fontWeight: '500' }}>
+                      <span style={{ display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%', backgroundColor: cat.color, marginRight: '0.5rem' }}></span>
+                      {cat.name}
+                    </td>
+                    <td style={{ padding: '1rem 1.5rem', color: 'var(--text-light)' }}>/{cat.slug}</td>
+                    <td style={{ padding: '1rem 1.5rem' }}>
+                      <span style={{ backgroundColor: '#f3f4f6', padding: '0.2rem 0.6rem', borderRadius: '20px', fontSize: '0.85rem', fontWeight: 'bold' }}>{cat.article_count}</span>
+                    </td>
+                    <td style={{ padding: '1rem 1.5rem', textAlign: 'right' }} onClick={(e) => e.stopPropagation()}>
+                      <button onClick={() => handleDelete(cat.id)} style={{ background: 'none', border: 'none', color: 'var(--primary-color)', cursor: 'pointer', fontWeight: 'bold' }}>Delete</button>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>

@@ -10,13 +10,13 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   const cat = await getCategoryBySlugDB(params.slug);
   const name = cat?.name || params.slug.charAt(0).toUpperCase() + params.slug.slice(1);
   return {
-    title: `${name} News | Live News`,
-    description: `Latest breaking news, updates, and analysis on ${name}. Stay updated with Live News.`,
+    title: `${name} News | Bolta Gurugram`,
+    description: `Latest breaking news, updates, and analysis on ${name}. Stay updated with Bolta Gurugram.`,
     openGraph: {
-      title: `${name} News | Live News`,
-      description: `Latest breaking news, updates, and analysis on ${name}. Stay updated with Live News.`,
-      url: `https://livenews.com/category/${params.slug}`,
-      siteName: 'Live News',
+      title: `${name} News | Bolta Gurugram`,
+      description: `Latest breaking news, updates, and analysis on ${name}. Stay updated with Bolta Gurugram.`,
+      url: `https://boltagurugram.com/category/${params.slug}`,
+      siteName: 'Bolta Gurugram',
     }
   }
 }

@@ -5,11 +5,19 @@ import { useAuth } from '@/lib/AuthContext';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 
+interface Category {
+  id: number;
+  name: string;
+  slug: string;
+  color?: string;
+}
+
 export default function Header() {
   const { user, isLoading, logout } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
   const [breakingNews, setBreakingNews] = useState<string>('Loading breaking news...');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [categories, setCategories] = useState<Category[]>([]);
   const router = useRouter();
 
   useEffect(() => {
@@ -28,6 +36,21 @@ export default function Header() {
       }
     }
     fetchBreaking();
+  }, []);
+
+  useEffect(() => {
+    async function fetchCategories() {
+      try {
+        const res = await fetch('/api/categories');
+        const data = await res.json();
+        if (data.categories) {
+          setCategories(data.categories);
+        }
+      } catch (err) {
+        console.error('Failed to fetch categories', err);
+      }
+    }
+    fetchCategories();
   }, []);
 
   const handleSearch = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -53,19 +76,19 @@ export default function Header() {
 
       {/* Main Header */}
       <div className="header-main">
-        <Link href="/">
-          <h1 style={{ fontSize: '2.5rem', fontWeight: '900', color: 'var(--primary-color)', letterSpacing: '-1px', margin: 0 }}>LIVE NEWS</h1>
+        <Link href="/" style={{ display: 'flex', alignItems: 'center' }}>
+          <img src="/logo.gif" alt="Bolta Gurugram Logo" style={{ height: '100px', objectFit: 'contain' }} />
         </Link>
 
         {/* Desktop actions */}
         <div className="header-actions hide-mobile">
-          <input 
-            type="text" 
-            placeholder="Search news..." 
+          <input
+            type="text"
+            placeholder="Search news..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             onKeyDown={handleSearch}
-            style={{ padding: '0.5rem 1rem', borderRadius: '20px', border: '1px solid var(--border-color)', outline: 'none' }} 
+            style={{ padding: '0.5rem 1rem', borderRadius: '20px', border: '1px solid var(--border-color)', outline: 'none' }}
           />
 
           {isLoading ? (
@@ -100,12 +123,8 @@ export default function Header() {
                   cursor: 'pointer',
                   transition: 'all 0.2s',
                 }}
-                onMouseOver={(e) => {
-                  e.currentTarget.style.backgroundColor = '#fef2f2';
-                }}
-                onMouseOut={(e) => {
-                  e.currentTarget.style.backgroundColor = 'transparent';
-                }}
+                onMouseOver={(e) => { e.currentTarget.style.backgroundColor = '#fef2f2'; }}
+                onMouseOut={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; }}
               >
                 Logout
               </button>
@@ -138,36 +157,32 @@ export default function Header() {
       {/* Mobile Menu Overlay */}
       <div className={`mobile-menu ${mobileMenuOpen ? 'open' : ''}`}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-          <h2 style={{ fontSize: '1.5rem', fontWeight: '900', color: 'var(--primary-color)' }}>LIVE NEWS</h2>
+          <img src="/logo.gif" alt="Bolta Gurugram Logo" style={{ height: '35px', objectFit: 'contain' }} />
           <button onClick={() => setMobileMenuOpen(false)} style={{ background: 'none', border: 'none', fontSize: '1.75rem', cursor: 'pointer', color: 'var(--text-dark)' }}>✕</button>
         </div>
 
         {/* Mobile search */}
-        <input 
-          type="text" 
-          placeholder="Search news..." 
+        <input
+          type="text"
+          placeholder="Search news..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           onKeyDown={handleSearch}
-          style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: '8px', border: '1px solid var(--border-color)', outline: 'none', marginBottom: '1.5rem', fontSize: '1rem', boxSizing: 'border-box' }} 
+          style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: '8px', border: '1px solid var(--border-color)', outline: 'none', marginBottom: '1.5rem', fontSize: '1rem', boxSizing: 'border-box' }}
         />
 
-        {/* Mobile nav links */}
+        {/* Mobile nav links - dynamic from DB */}
         <nav>
           <ul style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-            {[
-              { href: '/', label: 'Home' },
-              { href: '/category/national', label: 'National' },
-              { href: '/category/crime', label: 'Crime' },
-              { href: '/category/sports', label: 'Sports' },
-              { href: '/category/education', label: 'Education' },
-              { href: '/category/political', label: 'Political' },
-              { href: '/category/religious', label: 'Religious' },
-              { href: '/category/social', label: 'Social' },
-            ].map(link => (
-              <li key={link.href}>
-                <Link href={link.href} onClick={() => setMobileMenuOpen(false)} style={{ display: 'block', padding: '0.75rem 0', fontSize: '1.1rem', fontWeight: '600', borderBottom: '1px solid var(--border-color)' }}>
-                  {link.label}
+            <li>
+              <Link href="/" onClick={() => setMobileMenuOpen(false)} style={{ display: 'block', padding: '0.75rem 0', fontSize: '1.1rem', fontWeight: '600', borderBottom: '1px solid var(--border-color)' }}>
+                Latest News
+              </Link>
+            </li>
+            {categories.map(cat => (
+              <li key={cat.id}>
+                <Link href={`/category/${cat.slug}`} onClick={() => setMobileMenuOpen(false)} style={{ display: 'block', padding: '0.75rem 0', fontSize: '1.1rem', fontWeight: '600', borderBottom: '1px solid var(--border-color)' }}>
+                  {cat.name}
                 </Link>
               </li>
             ))}
@@ -193,17 +208,15 @@ export default function Header() {
         </div>
       </div>
 
-      {/* Category Navigation */}
+      {/* Category Navigation - dynamic from DB */}
       <nav className="header-nav" style={{ borderTop: '1px solid #f3f4f6' }}>
         <ul>
-          <li><Link href="/" style={{ color: 'var(--primary-color)' }}>Home</Link></li>
-          <li><Link href="/category/national">National</Link></li>
-          <li><Link href="/category/crime">Crime</Link></li>
-          <li><Link href="/category/sports">Sports</Link></li>
-          <li><Link href="/category/education">Education</Link></li>
-          <li><Link href="/category/political">Political</Link></li>
-          <li><Link href="/category/religious">Religious</Link></li>
-          <li><Link href="/category/social">Social</Link></li>
+          <li><Link href="/" style={{ color: 'var(--primary-color)' }}>Latest News</Link></li>
+          {categories.map(cat => (
+            <li key={cat.id}>
+              <Link href={`/category/${cat.slug}`}>{cat.name}</Link>
+            </li>
+          ))}
         </ul>
       </nav>
     </header>

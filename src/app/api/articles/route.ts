@@ -102,21 +102,27 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Title is required' }, { status: 400 });
     }
 
-    // Generate slug from title
-    const slug = title
+    // Generate slug from title - use timestamp fallback for non-ASCII titles (e.g. Hindi)
+    const rawSlug = title
       .toLowerCase()
       .replace(/[^a-z0-9\s-]/g, '')
       .replace(/\s+/g, '-')
       .replace(/-+/g, '-')
+      .replace(/^-+|-+$/g, '')  // trim leading/trailing dashes
       .substring(0, 200);
+
+    // If slug is empty or only dashes (e.g. pure Hindi title), use a timestamp slug
+    const baseSlug = rawSlug && rawSlug.replace(/-/g, '').length > 0
+      ? rawSlug
+      : `article-${Date.now()}`;
 
     // Check slug uniqueness
     const [existing] = await pool.query<RowDataPacket[]>(
       'SELECT id FROM articles WHERE slug = ?',
-      [slug]
+      [baseSlug]
     );
 
-    const finalSlug = existing.length > 0 ? `${slug}-${Date.now()}` : slug;
+    const finalSlug = existing.length > 0 ? `${baseSlug}-${Date.now()}` : baseSlug;
 
     const [result] = await pool.query<ResultSetHeader>(
       `INSERT INTO articles (slug, title, excerpt, content, image_url, category_id, author, status, tags, featured, read_time)

@@ -11,17 +11,17 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   const title = article?.title || params.slug.replace(/-/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase());
   const desc = article?.excerpt || `Read the latest news about ${title}.`;
   return {
-    title: `${title} | Live News`,
+    title: `${title} | Bolta Gurugram`,
     description: desc,
     openGraph: {
-      title: `${title} | Live News`,
+      title: `${title} | Bolta Gurugram`,
       description: desc,
       type: 'article',
-      url: `https://livenews.com/article/${params.slug}`,
+      url: `https://boltagurugram.com/article/${params.slug}`,
     },
     twitter: {
       card: 'summary_large_image',
-      title: `${title} | Live News`,
+      title: `${title} | Bolta Gurugram`,
       description: desc,
     }
   }

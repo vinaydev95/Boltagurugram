@@ -12,7 +12,7 @@ export async function GET() {
       FROM categories c
       LEFT JOIN articles a ON c.id = a.category_id AND a.status = 'Published'
       GROUP BY c.id
-      ORDER BY c.name ASC
+      ORDER BY c.sort_order ASC, c.name ASC
     `);
 
     return NextResponse.json({ categories: rows });
@@ -48,9 +48,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Category already exists' }, { status: 409 });
     }
 
+    // Get max sort_order
+    const [maxOrderRows] = await pool.query<RowDataPacket[]>(
+      'SELECT MAX(sort_order) as max_order FROM categories'
+    );
+    const nextOrder = (maxOrderRows[0]?.max_order ?? -1) + 1;
+
     const [result] = await pool.query<ResultSetHeader>(
-      'INSERT INTO categories (name, slug, color) VALUES (?, ?, ?)',
-      [name, slug, color || '#6b7280']
+      'INSERT INTO categories (name, slug, color, sort_order) VALUES (?, ?, ?, ?)',
+      [name, slug, color || '#6b7280', nextOrder]
     );
 
     const [newCat] = await pool.query<RowDataPacket[]>(
@@ -64,3 +70,40 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Failed to create category' }, { status: 500 });
   }
 }
+
+// PUT /api/categories — Reorder categories
+export async function PUT(request: NextRequest) {
+  try {
+    const body = await request.json();
+    const { orderedIds } = body;
+
+    if (!orderedIds || !Array.isArray(orderedIds)) {
+      return NextResponse.json({ error: 'orderedIds array is required' }, { status: 400 });
+    }
+
+    const connection = await pool.getConnection();
+    try {
+      await connection.beginTransaction();
+
+      for (let i = 0; i < orderedIds.length; i++) {
+        await connection.query(
+          'UPDATE categories SET sort_order = ? WHERE id = ?',
+          [i, orderedIds[i]]
+        );
+      }
+
+      await connection.commit();
+    } catch (err) {
+      await connection.rollback();
+      throw err;
+    } finally {
+      connection.release();
+    }
+
+    return NextResponse.json({ success: true, message: 'Categories reordered successfully' });
+  } catch (error) {
+    console.error('PUT /api/categories reorder error:', error);
+    return NextResponse.json({ error: 'Failed to reorder categories' }, { status: 500 });
+  }
+}
+

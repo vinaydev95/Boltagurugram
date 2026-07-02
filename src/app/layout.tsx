@@ -3,8 +3,13 @@ import type { Metadata } from 'next'
 import { AuthProvider } from '@/lib/AuthContext'
 
 export const metadata: Metadata = {
-  title: 'News Portal | Latest News, Breaking News',
-  description: 'Your reliable source for the latest news and updates.',
+  title: 'Bolta Gurugram | Latest News, Breaking News',
+  description: 'Your reliable source for the latest news and updates from Gurugram.',
+  icons: {
+    icon: '/favicon.png',
+    shortcut: '/favicon.png',
+    apple: '/favicon.png',
+  },
 }
 
 export default function RootLayout({

@@ -58,16 +58,11 @@ export default function SignInPage() {
 
         {/* Logo */}
         <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-          <h1 style={{
-            fontSize: '2rem',
-            fontWeight: '900',
-            color: '#e50914',
-            letterSpacing: '-1px',
-            marginBottom: '0.5rem',
-          }}>LIVE NEWS</h1>
+          <img src="/logo.gif" alt="Bolta Gurugram Logo" style={{ height: '100px', objectFit: 'contain', marginBottom: '0.5rem', display: 'block', margin: '0 auto' }} />
           <p style={{
             color: '#6b7280',
             fontSize: '0.95rem',
+            marginTop: '0.5rem',
           }}>Admin Dashboard Login</p>
         </div>
 
