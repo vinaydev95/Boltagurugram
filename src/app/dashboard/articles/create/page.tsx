@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import MediaPicker from '@/components/MediaPicker';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/lib/AuthContext';
 
 interface Category {
   id: number;
@@ -13,6 +14,7 @@ interface Category {
 
 export default function CreateArticlePage() {
   const router = useRouter();
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('write');
   const [headline, setHeadline] = useState('');
   const [content, setContent] = useState('');
@@ -110,7 +112,7 @@ export default function CreateArticlePage() {
           content: content,
           category_id: categoryId ? parseInt(categoryId) : null,
           image_url: imageUrl || null,
-          author: 'Admin',
+          author: user?.name || 'Admin',
           status,
           tags: tags || null,
           featured: false,
@@ -294,13 +296,7 @@ export default function CreateArticlePage() {
               <input type="text" placeholder="e.g. elections, economy" value={tags} onChange={(e) => setTags(e.target.value)} style={{ width: '100%', padding: '0.75rem', borderRadius: '6px', border: '1px solid var(--border-color)', boxSizing: 'border-box' }} />
             </div>
 
-            <div>
-              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500', fontSize: '0.9rem' }}>Author</label>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem', border: '1px solid var(--border-color)', borderRadius: '6px', backgroundColor: '#f9fafb' }}>
-                <div style={{ width: '24px', height: '24px', borderRadius: '50%', backgroundColor: 'var(--primary-color)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.7rem' }}>A</div>
-                <span style={{ fontSize: '0.9rem' }}>Admin User</span>
-              </div>
-            </div>
+
           </div>
 
           <div style={{ backgroundColor: 'white', padding: '1.5rem', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>

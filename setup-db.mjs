@@ -104,6 +104,20 @@ async function setup() {
   `);
   console.log('   ✅ media table created');
 
+  await conn.query(`
+    CREATE TABLE IF NOT EXISTS reporters (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      name VARCHAR(200) NOT NULL UNIQUE,
+      email VARCHAR(200) NOT NULL UNIQUE,
+      password VARCHAR(255) DEFAULT 'Reporter@2026',
+      role VARCHAR(100) DEFAULT 'Reporter',
+      avatar_url VARCHAR(500) NULL,
+      bio TEXT NULL,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+  console.log('   ✅ reporters table created');
+
   // Step 5: Seed categories
   console.log('🌱 Seeding categories...');
   const cats = [
@@ -123,6 +137,26 @@ async function setup() {
     );
   }
   console.log('   ✅ 7 categories seeded');
+
+  // Step 5b: Seed reporters
+  console.log('🌱 Seeding reporters...');
+  const initialReporters = [
+    ['Rajesh Kumar', 'rajesh@newsportal.com', 'Senior Correspondent'],
+    ['Amit Verma', 'amit@newsportal.com', 'Sports Reporter'],
+    ['Suresh Reddy', 'suresh@newsportal.com', 'Crime Reporter'],
+    ['Dr. Meera Joshi', 'meera@newsportal.com', 'Education Editor'],
+    ['Priya Sharma', 'priya@newsportal.com', 'Political Correspondent'],
+    ['Kavitha Nair', 'kavitha@newsportal.com', 'Cultural Reporter'],
+    ['Ananya Gupta', 'ananya@newsportal.com', 'Community Journalist']
+  ];
+
+  for (const [name, email, role] of initialReporters) {
+    await conn.query(
+      'INSERT IGNORE INTO reporters (name, email, role) VALUES (?, ?, ?)',
+      [name, email, role]
+    );
+  }
+  console.log('   ✅ 7 reporters seeded');
 
   // Step 6: Seed sample articles
   console.log('📝 Seeding sample articles...');

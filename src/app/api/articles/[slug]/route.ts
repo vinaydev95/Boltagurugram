@@ -119,6 +119,23 @@ export async function DELETE(
   try {
     const { slug } = params;
 
+    // Secure DELETE: Allow only admin role
+    const token = request.cookies.get('auth_token')?.value;
+    let isAdmin = false;
+    if (token) {
+      try {
+        const decoded = Buffer.from(token, 'base64').toString('utf-8');
+        const role = decoded.split(':')[1];
+        if (role === 'admin') {
+          isAdmin = true;
+        }
+      } catch (err) {}
+    }
+
+    if (!isAdmin) {
+      return NextResponse.json({ error: 'Permission denied: Only admin can delete articles' }, { status: 403 });
+    }
+
     const [result] = await pool.query<ResultSetHeader>(
       'DELETE FROM articles WHERE slug = ?',
       [slug]

@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useAuth } from '@/lib/AuthContext';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 export default function DashboardLayout({
@@ -12,13 +12,25 @@ export default function DashboardLayout({
 }) {
   const { user, isLoading, logout } = useAuth();
   const router = useRouter();
+  const pathname = usePathname() || '';
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
-    if (!isLoading && !user) {
-      router.push('/signin');
+    if (!isLoading) {
+      if (!user) {
+        router.push('/signin');
+      } else if (user.role !== 'admin' && (pathname.startsWith('/dashboard/reporters') || pathname.startsWith('/dashboard/categories'))) {
+        router.push('/dashboard');
+      }
     }
-  }, [user, isLoading, router]);
+  }, [user, isLoading, pathname, router]);
+
+  const isActive = (path: string) => {
+    if (path === '/dashboard') {
+      return pathname === '/dashboard';
+    }
+    return pathname.startsWith(path);
+  };
 
   if (isLoading) {
     return (
@@ -63,10 +75,85 @@ export default function DashboardLayout({
         </div>
         <nav>
           <ul style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            <li><Link href="/dashboard" onClick={() => setSidebarOpen(false)} style={{ display: 'block', padding: '0.75rem 1rem', borderRadius: '4px', backgroundColor: '#374151' }}>Overview</Link></li>
-            <li><Link href="/dashboard/articles" onClick={() => setSidebarOpen(false)} style={{ display: 'block', padding: '0.75rem 1rem', borderRadius: '4px' }}>Articles</Link></li>
-            <li><Link href="/dashboard/categories" onClick={() => setSidebarOpen(false)} style={{ display: 'block', padding: '0.75rem 1rem', borderRadius: '4px' }}>Categories</Link></li>
-            <li><Link href="/dashboard/media" onClick={() => setSidebarOpen(false)} style={{ display: 'block', padding: '0.75rem 1rem', borderRadius: '4px' }}>Media</Link></li>
+            <li>
+              <Link 
+                href="/dashboard" 
+                onClick={() => setSidebarOpen(false)} 
+                style={{ 
+                  display: 'block', 
+                  padding: '0.75rem 1rem', 
+                  borderRadius: '4px', 
+                  backgroundColor: isActive('/dashboard') ? '#374151' : 'transparent',
+                  color: 'white'
+                }}
+              >
+                Overview
+              </Link>
+            </li>
+            <li>
+              <Link 
+                href="/dashboard/articles" 
+                onClick={() => setSidebarOpen(false)} 
+                style={{ 
+                  display: 'block', 
+                  padding: '0.75rem 1rem', 
+                  borderRadius: '4px',
+                  backgroundColor: isActive('/dashboard/articles') ? '#374151' : 'transparent',
+                  color: 'white'
+                }}
+              >
+                Articles
+              </Link>
+            </li>
+            {user?.role === 'admin' && (
+              <li>
+                <Link 
+                  href="/dashboard/categories" 
+                  onClick={() => setSidebarOpen(false)} 
+                  style={{ 
+                    display: 'block', 
+                    padding: '0.75rem 1rem', 
+                    borderRadius: '4px',
+                    backgroundColor: isActive('/dashboard/categories') ? '#374151' : 'transparent',
+                    color: 'white'
+                  }}
+                >
+                  Categories
+                </Link>
+              </li>
+            )}
+            <li>
+              <Link 
+                href="/dashboard/media" 
+                onClick={() => setSidebarOpen(false)} 
+                style={{ 
+                  display: 'block', 
+                  padding: '0.75rem 1rem', 
+                  borderRadius: '4px',
+                  backgroundColor: isActive('/dashboard/media') ? '#374151' : 'transparent',
+                  color: 'white'
+                }}
+              >
+                Media
+              </Link>
+            </li>
+            {user?.role === 'admin' && (
+              <li>
+                <Link 
+                  href="/dashboard/reporters" 
+                  onClick={() => setSidebarOpen(false)} 
+                  style={{ 
+                    display: 'block', 
+                    padding: '0.75rem 1rem', 
+                    borderRadius: '4px',
+                    backgroundColor: isActive('/dashboard/reporters') ? '#374151' : 'transparent',
+                    color: 'white'
+                  }}
+                >
+                  Reporters
+                </Link>
+              </li>
+            )}
             <li><Link href="/" onClick={() => setSidebarOpen(false)} style={{ display: 'block', padding: '0.75rem 1rem', borderRadius: '4px', marginTop: '2rem', color: '#9ca3af' }}>← View Site</Link></li>
             <li>
               <button

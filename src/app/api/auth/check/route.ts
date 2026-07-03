@@ -6,11 +6,11 @@ export async function GET(request: NextRequest) {
   if (token) {
     try {
       const decoded = Buffer.from(token, 'base64').toString('utf-8');
-      const email = decoded.split(':')[0];
+      const [email, role, name] = decoded.split(':');
 
       return NextResponse.json({
         authenticated: true,
-        user: { email, role: 'admin', name: 'Admin' },
+        user: { email, role: role || 'admin', name: name || 'Admin' },
       });
     } catch {
       return NextResponse.json({ authenticated: false });

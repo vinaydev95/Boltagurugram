@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
+import { useAuth } from '@/lib/AuthContext';
 
 interface Article {
   id: number;
@@ -14,6 +15,7 @@ interface Article {
 }
 
 export default function ArticlesPage() {
+  const { user } = useAuth();
   const [articles, setArticles] = useState<Article[]>([]);
   const [categories, setCategories] = useState<{ id: number; name: string }[]>([]);
   const [search, setSearch] = useState('');
@@ -155,7 +157,9 @@ export default function ArticlesPage() {
                     <td style={{ padding: '1rem 1.5rem', textAlign: 'right' }}>
                       <Link href={`/article/${article.slug}`} style={{ color: '#3b82f6', fontWeight: 'bold', marginRight: '1rem' }} target="_blank">View</Link>
                       <Link href={`/dashboard/articles/edit/${article.slug}`} style={{ color: '#f59e0b', fontWeight: 'bold', marginRight: '1rem' }}>Edit</Link>
-                      <button onClick={() => handleDelete(article.slug)} style={{ color: '#ef4444', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}>Delete</button>
+                      {user?.role === 'admin' && (
+                        <button onClick={() => handleDelete(article.slug)} style={{ color: '#ef4444', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}>Delete</button>
+                      )}
                     </td>
                   </tr>
                 ))
