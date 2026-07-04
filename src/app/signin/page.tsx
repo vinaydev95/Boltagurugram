@@ -97,7 +97,6 @@ export default function SignInPage() {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="admin@newsportal.com"
               required
               style={{
                 width: '100%',
@@ -127,7 +126,6 @@ export default function SignInPage() {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
               required
               style={{
                 width: '100%',
