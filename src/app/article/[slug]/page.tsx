@@ -10,6 +10,10 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   const article = await getArticleBySlugDB(params.slug);
   const title = article?.title || params.slug.replace(/-/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase());
   const desc = article?.excerpt || `Read the latest news about ${title}.`;
+  
+  // Resolve article image or fallback to brand logo
+  const shareImage = article?.image_url || 'https://boltagurugram.com/logo.gif';
+
   return {
     title: `${title} | Bolta Gurugram`,
     description: desc,
@@ -18,11 +22,20 @@ export async function generateMetadata({ params }: { params: { slug: string } })
       description: desc,
       type: 'article',
       url: `https://boltagurugram.com/article/${params.slug}`,
+      images: [
+        {
+          url: shareImage,
+          width: 1200,
+          height: 630,
+          alt: title,
+        }
+      ],
     },
     twitter: {
       card: 'summary_large_image',
       title: `${title} | Bolta Gurugram`,
       description: desc,
+      images: [shareImage],
     }
   }
 }
@@ -86,10 +99,78 @@ export default async function ArticlePage({ params }: { params: { slug: string }
               </div>
 
               {/* Social Share Buttons */}
-              <div style={{ display: 'flex', gap: '0.5rem' }}>
-                <button style={{ width: '36px', height: '36px', borderRadius: '50%', backgroundColor: '#1877F2', color: 'white', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}>f</button>
-                <button style={{ width: '36px', height: '36px', borderRadius: '50%', backgroundColor: '#1DA1F2', color: 'white', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}>t</button>
-                <button style={{ width: '36px', height: '36px', borderRadius: '50%', backgroundColor: '#25D366', color: 'white', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}>w</button>
+              <div style={{ display: 'flex', gap: '0.65rem' }}>
+                {/* Facebook Share */}
+                <a 
+                  href={`https://www.facebook.com/sharer/sharer.php?u=https://boltagurugram.com/article/${article.slug}`}
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  title="Share on Facebook"
+                  className="share-btn"
+                  style={{ 
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    width: '36px', 
+                    height: '36px', 
+                    borderRadius: '50%', 
+                    backgroundColor: '#1877F2', 
+                    color: 'white', 
+                    textDecoration: 'none'
+                  }}
+                >
+                  <svg fill="currentColor" viewBox="0 0 24 24" width="18" height="18">
+                    <path d="M22 12c0-5.52-4.48-10-10-10S2 6.48 2 12c0 4.84 3.44 8.87 8 9.8V15H8v-3h2V9.5C10 7.57 11.57 6 13.5 6H16v3h-2c-.55 0-1 .45-1 1v2h3v3h-3v6.95c4.56-.93 8-4.96 8-9.75z"/>
+                  </svg>
+                </a>
+
+                {/* Twitter Share */}
+                <a 
+                  href={`https://twitter.com/intent/tweet?url=https://boltagurugram.com/article/${article.slug}&text=${encodeURIComponent(article.title)}`}
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  title="Share on X (Twitter)"
+                  className="share-btn"
+                  style={{ 
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    width: '36px', 
+                    height: '36px', 
+                    borderRadius: '50%', 
+                    backgroundColor: '#000000', 
+                    color: 'white', 
+                    textDecoration: 'none'
+                  }}
+                >
+                  <svg fill="currentColor" viewBox="0 0 24 24" width="14" height="14">
+                    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                  </svg>
+                </a>
+
+                {/* WhatsApp Share */}
+                <a 
+                  href={`https://api.whatsapp.com/send?text=${encodeURIComponent(article.title + ' - https://boltagurugram.com/article/' + article.slug)}`}
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  title="Share on WhatsApp"
+                  className="share-btn"
+                  style={{ 
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    width: '36px', 
+                    height: '36px', 
+                    borderRadius: '50%', 
+                    backgroundColor: '#25D366', 
+                    color: 'white', 
+                    textDecoration: 'none'
+                  }}
+                >
+                  <svg fill="currentColor" viewBox="0 0 24 24" width="18" height="18">
+                    <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.739-1.456L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.825 1.451 5.436 0 9.86-4.37 9.864-9.799.002-2.63-1.023-5.101-2.885-6.963C16.578 3.88 14.102 2.855 11.5 2.853c-5.438 0-9.863 4.37-9.867 9.8-.001 2.128.561 4.21 1.63 6.026l-.991 3.623 3.734-.949z"/>
+                  </svg>
+                </a>
               </div>
             </div>
 

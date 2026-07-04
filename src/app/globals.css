@@ -515,3 +515,11 @@ ul {
     align-items: flex-start;
   }
 }
+
+/* Share button animation */
+.share-btn {
+  transition: transform 0.2s ease-in-out !important;
+}
+.share-btn:hover {
+  transform: scale(1.1) !important;
+}
