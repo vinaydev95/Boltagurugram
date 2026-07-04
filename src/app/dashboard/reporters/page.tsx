@@ -209,7 +209,6 @@ export default function ReportersPage() {
               <label style={{ display: 'block', marginBottom: '0.25rem', fontSize: '0.9rem', fontWeight: '500' }}>Name</label>
               <input
                 type="text"
-                placeholder="Full Name..."
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 style={{
@@ -228,7 +227,6 @@ export default function ReportersPage() {
               <label style={{ display: 'block', marginBottom: '0.25rem', fontSize: '0.9rem', fontWeight: '500' }}>Email</label>
               <input
                 type="email"
-                placeholder="email@newsportal.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 style={{
@@ -247,7 +245,6 @@ export default function ReportersPage() {
               <label style={{ display: 'block', marginBottom: '0.25rem', fontSize: '0.9rem', fontWeight: '500' }}>Login Password</label>
               <input
                 type="text"
-                placeholder="Password..."
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 style={{

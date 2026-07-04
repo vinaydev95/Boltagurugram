@@ -30,7 +30,57 @@ export default function CreateArticlePage() {
   const [message, setMessage] = useState('');
   const [showMediaPicker, setShowMediaPicker] = useState(false);
   const [showInlineImagePicker, setShowInlineImagePicker] = useState(false);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const editorRef = useRef<HTMLDivElement>(null);
+  const [isInitialized, setIsInitialized] = useState(false);
+
+  const [activeFormats, setActiveFormats] = useState({
+    b: false,
+    i: false,
+    u: false,
+    h2: false,
+    h3: false,
+    quote: false,
+    link: false,
+  });
+
+  const updateActiveFormats = () => {
+    const editor = editorRef.current;
+    if (!editor) return;
+
+    const isAncestorTag = (tagName: string) => {
+      const selection = window.getSelection();
+      if (!selection || selection.rangeCount === 0) return false;
+      let node: Node | null = selection.anchorNode;
+      while (node && node !== editor) {
+        if (node.nodeName === tagName) return true;
+        node = node.parentNode;
+      }
+      return false;
+    };
+
+    setActiveFormats({
+      b: document.queryCommandState('bold'),
+      i: document.queryCommandState('italic'),
+      u: document.queryCommandState('underline'),
+      h2: document.queryCommandValue('formatBlock') === 'h2' || isAncestorTag('H2'),
+      h3: document.queryCommandValue('formatBlock') === 'h3' || isAncestorTag('H3'),
+      quote: document.queryCommandValue('formatBlock') === 'blockquote' || isAncestorTag('BLOCKQUOTE'),
+      link: isAncestorTag('A'),
+    });
+  };
+
+  const handleEditorInput = () => {
+    if (editorRef.current) {
+      setContent(editorRef.current.innerHTML);
+    }
+  };
+
+  useEffect(() => {
+    if (editorRef.current && !isInitialized) {
+      editorRef.current.innerHTML = content;
+      setIsInitialized(true);
+    }
+  }, [content, isInitialized]);
 
   useEffect(() => {
     async function fetchCategories() {
@@ -46,47 +96,43 @@ export default function CreateArticlePage() {
   }, []);
 
   const insertInlineImage = (url: string) => {
-    const textarea = textareaRef.current;
-    if (!textarea) return;
-    const start = textarea.selectionStart;
-    const end = textarea.selectionEnd;
-    const imgHtml = `\n<figure style="margin: 1.5rem 0; text-align: center;"><img src="${url}" alt="Article image" style="max-width: 100%; border-radius: 8px; display: block; margin: 0 auto;" /></figure>\n`;
-    const newContent = content.substring(0, start) + imgHtml + content.substring(end);
-    setContent(newContent);
-    // Restore cursor after inserted image
-    setTimeout(() => {
-      textarea.selectionStart = start + imgHtml.length;
-      textarea.selectionEnd = start + imgHtml.length;
-      textarea.focus();
-    }, 0);
+    const editor = editorRef.current;
+    if (!editor) return;
+    editor.focus();
+    const imgHtml = `<figure style="margin: 1.5rem 0; text-align: center;"><img src="${url}" alt="Article image" style="max-width: 100%; border-radius: 8px; display: block; margin: 0 auto;" /></figure><p><br></p>`;
+    document.execCommand('insertHTML', false, imgHtml);
+    handleEditorInput();
   };
 
   const applyFormat = (tag: string) => {
-    const textarea = textareaRef.current;
-    if (!textarea) return;
-    const start = textarea.selectionStart;
-    const end = textarea.selectionEnd;
-    const selected = content.substring(start, end);
-    const placeholder = selected || 'text here';
-    let wrapped = '';
-    if (tag === 'b') wrapped = `<strong>${placeholder}</strong>`;
-    else if (tag === 'i') wrapped = `<em>${placeholder}</em>`;
-    else if (tag === 'u') wrapped = `<u>${placeholder}</u>`;
-    else if (tag === 'h2') wrapped = `\n<h2>${placeholder}</h2>\n`;
-    else if (tag === 'h3') wrapped = `\n<h3>${placeholder}</h3>\n`;
-    else if (tag === 'quote') wrapped = `\n<blockquote style="border-left:4px solid #e50914;padding:1rem 1.5rem;margin:1.5rem 0;background:#fef2f2;font-style:italic;">${placeholder}</blockquote>\n`;
-    else if (tag === 'link') {
+    const editor = editorRef.current;
+    if (!editor) return;
+    editor.focus();
+
+    if (tag === 'b') {
+      document.execCommand('bold', false);
+    } else if (tag === 'i') {
+      document.execCommand('italic', false);
+    } else if (tag === 'u') {
+      document.execCommand('underline', false);
+    } else if (tag === 'h2') {
+      const block = document.queryCommandValue('formatBlock');
+      document.execCommand('formatBlock', false, block === 'h2' ? 'div' : 'h2');
+    } else if (tag === 'h3') {
+      const block = document.queryCommandValue('formatBlock');
+      document.execCommand('formatBlock', false, block === 'h3' ? 'div' : 'h3');
+    } else if (tag === 'quote') {
+      const block = document.queryCommandValue('formatBlock');
+      document.execCommand('formatBlock', false, block === 'blockquote' ? 'div' : 'blockquote');
+    } else if (tag === 'link') {
       const url = window.prompt('Enter URL:', 'https://');
-      if (!url) return;
-      wrapped = `<a href="${url}" target="_blank" rel="noopener noreferrer">${placeholder}</a>`;
+      if (url) {
+        document.execCommand('createLink', false, url);
+      }
     }
-    const newContent = content.substring(0, start) + wrapped + content.substring(end);
-    setContent(newContent);
-    setTimeout(() => {
-      textarea.selectionStart = start + wrapped.length;
-      textarea.selectionEnd = start + wrapped.length;
-      textarea.focus();
-    }, 0);
+
+    handleEditorInput();
+    updateActiveFormats();
   };
 
   const saveArticle = async (status: 'Draft' | 'Published') => {
@@ -228,18 +274,33 @@ export default function CreateArticlePage() {
                     { label: 'H3', tag: 'h3', title: 'Heading 3', style: { fontWeight: 'bold' } },
                     { label: '"', tag: 'quote', title: 'Blockquote', style: {} },
                     { label: '🔗', tag: 'link', title: 'Insert Link', style: {} },
-                  ].map(tool => (
-                    <button
-                      key={tool.tag}
-                      type="button"
-                      title={tool.title}
-                      onMouseDown={(e) => {
-                        e.preventDefault();
-                        applyFormat(tool.tag);
-                      }}
-                      style={{ width: '32px', height: '32px', border: '1px solid var(--border-color)', borderRadius: '4px', background: 'white', cursor: 'pointer', ...tool.style }}
-                    >{tool.label}</button>
-                  ))}
+                  ].map(tool => {
+                    const isActive = activeFormats[tool.tag as keyof typeof activeFormats];
+                    return (
+                      <button
+                        key={tool.tag}
+                        type="button"
+                        title={tool.title}
+                        onMouseDown={(e) => {
+                          e.preventDefault();
+                          applyFormat(tool.tag);
+                        }}
+                        style={{
+                          width: '32px',
+                          height: '32px',
+                          border: isActive ? '1px solid var(--primary-color)' : '1px solid var(--border-color)',
+                          borderRadius: '4px',
+                          background: isActive ? '#fef2f2' : 'white',
+                          color: isActive ? 'var(--primary-color)' : 'inherit',
+                          cursor: 'pointer',
+                          fontWeight: 'bold',
+                          ...tool.style,
+                        }}
+                      >
+                        {tool.label}
+                      </button>
+                    );
+                  })}
                   <button
                     type="button"
                     title="Insert image between paragraphs"
@@ -253,13 +314,55 @@ export default function CreateArticlePage() {
                   </button>
                   <span style={{ fontSize: '0.75rem', color: '#9ca3af', marginLeft: '0.5rem' }}>Place cursor where you want the image, then click Insert Image</span>
                 </div>
-                <textarea
-                  ref={textareaRef}
-                  placeholder="Write the article content here...\n\nTip: Place your cursor between paragraphs and click '📷 Insert Image' to add an image inline."
-                  value={content}
-                  onChange={(e) => setContent(e.target.value)}
-                  style={{ width: '100%', minHeight: '400px', padding: '1rem', border: '1px solid var(--border-color)', borderRadius: '6px', resize: 'vertical', fontFamily: 'inherit', fontSize: '1rem', lineHeight: '1.6', outline: 'none', boxSizing: 'border-box' }}
-                ></textarea>
+                <style dangerouslySetInnerHTML={{__html: `
+                  .rich-editor:empty:before {
+                    content: attr(data-placeholder);
+                    color: #9ca3af;
+                    cursor: text;
+                  }
+                  .rich-editor blockquote {
+                    border-left: 4px solid #e50914;
+                    padding: 0.5rem 1rem;
+                    margin: 1rem 0;
+                    background: #fef2f2;
+                    font-style: italic;
+                  }
+                  .rich-editor h2 {
+                    font-size: 1.5rem;
+                    font-weight: bold;
+                    margin: 1rem 0 0.5rem 0;
+                  }
+                  .rich-editor h3 {
+                    font-size: 1.25rem;
+                    font-weight: bold;
+                    margin: 1rem 0 0.5rem 0;
+                  }
+                `}} />
+                <div
+                  ref={editorRef}
+                  className="rich-editor"
+                  contentEditable
+                  data-placeholder="Write the article content here"
+                  onInput={handleEditorInput}
+                  onSelect={updateActiveFormats}
+                  onKeyUp={updateActiveFormats}
+                  onMouseUp={updateActiveFormats}
+                  style={{
+                    width: '100%',
+                    minHeight: '400px',
+                    padding: '1rem',
+                    border: '1px solid var(--border-color)',
+                    borderRadius: '6px',
+                    resize: 'vertical',
+                    fontFamily: 'inherit',
+                    fontSize: '1rem',
+                    lineHeight: '1.6',
+                    outline: 'none',
+                    boxSizing: 'border-box',
+                    backgroundColor: 'white',
+                    overflowY: 'auto',
+                  }}
+                ></div>
               </div>
             ) : (
               <div style={{ padding: '2rem', minHeight: '400px' }}>
