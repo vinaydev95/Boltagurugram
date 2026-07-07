@@ -96,22 +96,22 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { title, excerpt, content, image_url, category_id, author, status, tags, featured, read_time } = body;
+    const { title, excerpt, content, image_url, meta_title, meta_description, category_id, author, status, tags, featured, read_time } = body;
 
     if (!title) {
       return NextResponse.json({ error: 'Title is required' }, { status: 400 });
     }
 
-    // Generate slug from title - use timestamp fallback for non-ASCII titles (e.g. Hindi)
+    // Generate slug from title - support Unicode letters/numbers (e.g. Hindi)
     const rawSlug = title
       .toLowerCase()
-      .replace(/[^a-z0-9\s-]/g, '')
+      .replace(new RegExp('[^\\p{L}\\p{N}\\s-]', 'gu'), '') // Support Unicode letters & numbers
       .replace(/\s+/g, '-')
       .replace(/-+/g, '-')
       .replace(/^-+|-+$/g, '')  // trim leading/trailing dashes
       .substring(0, 200);
 
-    // If slug is empty or only dashes (e.g. pure Hindi title), use a timestamp slug
+    // If slug is empty or only dashes, use a timestamp slug
     const baseSlug = rawSlug && rawSlug.replace(/-/g, '').length > 0
       ? rawSlug
       : `article-${Date.now()}`;
@@ -125,14 +125,16 @@ export async function POST(request: NextRequest) {
     const finalSlug = existing.length > 0 ? `${baseSlug}-${Date.now()}` : baseSlug;
 
     const [result] = await pool.query<ResultSetHeader>(
-      `INSERT INTO articles (slug, title, excerpt, content, image_url, category_id, author, status, tags, featured, read_time)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO articles (slug, title, excerpt, content, image_url, meta_title, meta_description, category_id, author, status, tags, featured, read_time)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         finalSlug,
         title,
         excerpt || null,
         content || null,
         image_url || null,
+        meta_title || null,
+        meta_description || null,
         category_id || null,
         author || 'Admin',
         status || 'Draft',

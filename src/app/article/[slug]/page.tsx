@@ -9,17 +9,23 @@ export const dynamic = 'force-dynamic';
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
   const decodedSlug = decodeURIComponent(params.slug);
   const article = await getArticleBySlugDB(decodedSlug);
-  const title = article?.title || decodedSlug.replace(/-/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase());
-  const desc = article?.excerpt || `Read the latest news about ${title}.`;
+  
+  // Default values
+  const defaultTitle = article?.title || decodedSlug.replace(/-/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase());
+  const defaultDesc = article?.excerpt || `Read the latest news about ${defaultTitle}.`;
+
+  // Custom SEO values if present, else fallback
+  const title = article?.meta_title || `${defaultTitle} | Bolta Gurugram`;
+  const desc = article?.meta_description || defaultDesc;
   
   // Resolve article image or fallback to brand logo
   const shareImage = article?.image_url || 'https://boltagurugram.com/logo.gif';
 
   return {
-    title: `${title} | Bolta Gurugram`,
+    title: title,
     description: desc,
     openGraph: {
-      title: `${title} | Bolta Gurugram`,
+      title: title,
       description: desc,
       type: 'article',
       url: `https://boltagurugram.com/article/${decodedSlug}`,
@@ -28,13 +34,13 @@ export async function generateMetadata({ params }: { params: { slug: string } })
           url: shareImage,
           width: 1200,
           height: 630,
-          alt: title,
+          alt: defaultTitle,
         }
       ],
     },
     twitter: {
       card: 'summary_large_image',
-      title: `${title} | Bolta Gurugram`,
+      title: title,
       description: desc,
       images: [shareImage],
     }

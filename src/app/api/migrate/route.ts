@@ -12,6 +12,24 @@ export async function GET() {
       }
     }
 
+    // Add meta_title column if it doesn't exist
+    try {
+      await pool.query('ALTER TABLE articles ADD COLUMN meta_title VARCHAR(255) NULL AFTER image_url');
+    } catch (err: any) {
+      if (err.code !== 'ER_DUP_FIELDNAME') {
+        throw err;
+      }
+    }
+
+    // Add meta_description column if it doesn't exist
+    try {
+      await pool.query('ALTER TABLE articles ADD COLUMN meta_description VARCHAR(500) NULL AFTER meta_title');
+    } catch (err: any) {
+      if (err.code !== 'ER_DUP_FIELDNAME') {
+        throw err;
+      }
+    }
+
     // 2. Create reporters table
     await pool.query(`
       CREATE TABLE IF NOT EXISTS reporters (

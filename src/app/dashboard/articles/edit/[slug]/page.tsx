@@ -95,6 +95,8 @@ export default function EditArticlePage({ params }: { params: { slug: string } }
           setCategoryId(a.category_id ? String(a.category_id) : '');
           setTags(a.tags || '');
           setImageUrl(a.image_url || '');
+          setMetaTitle(a.meta_title || '');
+          setMetaDesc(a.meta_description || '');
           setAuthor(a.author || 'Admin');
         } else {
           alert('Article not found');
@@ -179,6 +181,8 @@ export default function EditArticlePage({ params }: { params: { slug: string } }
           content: content,
           category_id: categoryId ? parseInt(categoryId) : null,
           image_url: imageUrl || null,
+          meta_title: metaTitle || null,
+          meta_description: metaDesc || null,
           author: author,
           status,
           tags: tags || null,

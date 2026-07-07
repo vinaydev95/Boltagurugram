@@ -78,6 +78,8 @@ async function setup() {
       excerpt TEXT,
       content LONGTEXT,
       image_url VARCHAR(500),
+      meta_title VARCHAR(255) NULL,
+      meta_description VARCHAR(500) NULL,
       category_id INT,
       author VARCHAR(200) DEFAULT 'Admin',
       status ENUM('Published', 'Draft') DEFAULT 'Draft',

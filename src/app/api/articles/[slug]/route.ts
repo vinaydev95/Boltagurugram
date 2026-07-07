@@ -50,7 +50,7 @@ export async function PUT(
   try {
     const decodedSlug = decodeURIComponent(params.slug);
     const body = await request.json();
-    const { title, excerpt, content, image_url, category_id, author, status, tags, featured, read_time } = body;
+    const { title, excerpt, content, image_url, meta_title, meta_description, category_id, author, status, tags, featured, read_time } = body;
 
     // Check if article exists
     const [existing] = await pool.query<RowDataPacket[]>(
@@ -76,6 +76,8 @@ export async function PUT(
     if (excerpt !== undefined) { updates.push('excerpt = ?'); updateParams.push(excerpt); }
     if (content !== undefined) { updates.push('content = ?'); updateParams.push(content); }
     if (image_url !== undefined) { updates.push('image_url = ?'); updateParams.push(image_url); }
+    if (meta_title !== undefined) { updates.push('meta_title = ?'); updateParams.push(meta_title); }
+    if (meta_description !== undefined) { updates.push('meta_description = ?'); updateParams.push(meta_description); }
     if (category_id !== undefined) { updates.push('category_id = ?'); updateParams.push(category_id); }
     if (author !== undefined) { updates.push('author = ?'); updateParams.push(author); }
     if (status !== undefined) { updates.push('status = ?'); updateParams.push(status); }

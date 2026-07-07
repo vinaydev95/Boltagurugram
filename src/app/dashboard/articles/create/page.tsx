@@ -158,6 +158,8 @@ export default function CreateArticlePage() {
           content: content,
           category_id: categoryId ? parseInt(categoryId) : null,
           image_url: imageUrl || null,
+          meta_title: metaTitle || null,
+          meta_description: metaDesc || null,
           author: user?.name || 'Admin',
           status,
           tags: tags || null,

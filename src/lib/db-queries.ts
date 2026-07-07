@@ -13,6 +13,8 @@ export interface DBArticle {
   excerpt: string;
   content: string;
   image_url: string | null;
+  meta_title?: string | null;
+  meta_description?: string | null;
   category_id: number;
   category_name: string;
   category_slug: string;
