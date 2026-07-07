@@ -2,13 +2,14 @@ import { Metadata } from 'next';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import Link from 'next/link';
-import { getArticleBySlugDB, getRelatedArticlesDB, getLatestArticlesDB } from '@/lib/db-queries';
+import { getArticleBySlugDB, getRelatedArticlesDB, getLatestArticlesDB, incrementArticleViewsDB } from '@/lib/db-queries';
 
 export const dynamic = 'force-dynamic';
 
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
-  const article = await getArticleBySlugDB(params.slug);
-  const title = article?.title || params.slug.replace(/-/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase());
+  const decodedSlug = decodeURIComponent(params.slug);
+  const article = await getArticleBySlugDB(decodedSlug);
+  const title = article?.title || decodedSlug.replace(/-/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase());
   const desc = article?.excerpt || `Read the latest news about ${title}.`;
   
   // Resolve article image or fallback to brand logo
@@ -21,7 +22,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
       title: `${title} | Bolta Gurugram`,
       description: desc,
       type: 'article',
-      url: `https://boltagurugram.com/article/${params.slug}`,
+      url: `https://boltagurugram.com/article/${decodedSlug}`,
       images: [
         {
           url: shareImage,
@@ -41,10 +42,11 @@ export async function generateMetadata({ params }: { params: { slug: string } })
 }
 
 export default async function ArticlePage({ params }: { params: { slug: string } }) {
-  const article = await getArticleBySlugDB(params.slug);
+  const decodedSlug = decodeURIComponent(params.slug);
+  const article = await getArticleBySlugDB(decodedSlug);
 
   if (!article) {
-    const title = params.slug.replace(/-/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase());
+    const title = decodedSlug.replace(/-/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase());
     return (
       <div style={{ backgroundColor: 'var(--bg-color)', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
         <Header />
@@ -57,6 +59,9 @@ export default async function ArticlePage({ params }: { params: { slug: string }
       </div>
     );
   }
+
+  // Increment views only here in the page component
+  await incrementArticleViewsDB(decodedSlug);
 
   const related = await getRelatedArticlesDB(article.slug, article.category_id, 4);
   const moreArticles = (await getLatestArticlesDB(5)).filter((a: any) => a.slug !== article.slug).slice(0, 4);

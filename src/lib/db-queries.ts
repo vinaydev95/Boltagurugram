@@ -104,10 +104,11 @@ export async function getArticlesByCategoryDB(categorySlug: string, count: numbe
   return rows.map(normalizeArticle);
 }
 
-export async function getArticleBySlugDB(slug: string) {
-  // Increment views
+export async function incrementArticleViewsDB(slug: string) {
   await pool.query('UPDATE articles SET views = views + 1 WHERE slug = ?', [slug]);
+}
 
+export async function getArticleBySlugDB(slug: string) {
   const [rows] = await pool.query<RowDataPacket[]>(
     `SELECT a.*, c.name as category_name, c.slug as category_slug, c.color as category_color
      FROM articles a

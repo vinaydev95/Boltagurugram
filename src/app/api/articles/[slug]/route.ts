@@ -8,10 +8,7 @@ export async function GET(
   { params }: { params: { slug: string } }
 ) {
   try {
-    const { slug } = params;
-
-    // Increment views
-    await pool.query('UPDATE articles SET views = views + 1 WHERE slug = ?', [slug]);
+    const decodedSlug = decodeURIComponent(params.slug);
 
     // Fetch article with category info
     const [rows] = await pool.query<RowDataPacket[]>(
@@ -19,7 +16,7 @@ export async function GET(
        FROM articles a
        LEFT JOIN categories c ON a.category_id = c.id
        WHERE a.slug = ?`,
-      [slug]
+      [decodedSlug]
     );
 
     if (rows.length === 0) {
@@ -35,13 +32,13 @@ export async function GET(
        LEFT JOIN categories c ON a.category_id = c.id
        WHERE a.category_id = ? AND a.slug != ? AND a.status = 'Published'
        ORDER BY a.created_at DESC LIMIT 4`,
-      [article.category_id, slug]
+      [article.category_id, decodedSlug]
     );
 
     return NextResponse.json({ article, related });
-  } catch (error) {
+  } catch (error: any) {
     console.error('GET /api/articles/[slug] error:', error);
-    return NextResponse.json({ error: 'Failed to fetch article' }, { status: 500 });
+    return NextResponse.json({ error: error.message || 'Failed to fetch article' }, { status: 500 });
   }
 }
 
@@ -51,14 +48,14 @@ export async function PUT(
   { params }: { params: { slug: string } }
 ) {
   try {
-    const { slug } = params;
+    const decodedSlug = decodeURIComponent(params.slug);
     const body = await request.json();
     const { title, excerpt, content, image_url, category_id, author, status, tags, featured, read_time } = body;
 
     // Check if article exists
     const [existing] = await pool.query<RowDataPacket[]>(
       'SELECT id FROM articles WHERE slug = ?',
-      [slug]
+      [decodedSlug]
     );
 
     if (existing.length === 0) {
@@ -90,7 +87,7 @@ export async function PUT(
       return NextResponse.json({ error: 'No fields to update' }, { status: 400 });
     }
 
-    updateParams.push(slug);
+    updateParams.push(decodedSlug);
     await pool.query<ResultSetHeader>(
       `UPDATE articles SET ${updates.join(', ')} WHERE slug = ?`,
       updateParams
@@ -105,9 +102,9 @@ export async function PUT(
     );
 
     return NextResponse.json({ success: true, article: updated[0] });
-  } catch (error) {
+  } catch (error: any) {
     console.error('PUT /api/articles/[slug] error:', error);
-    return NextResponse.json({ error: 'Failed to update article' }, { status: 500 });
+    return NextResponse.json({ error: error.message || 'Failed to update article' }, { status: 500 });
   }
 }
 
@@ -117,7 +114,7 @@ export async function DELETE(
   { params }: { params: { slug: string } }
 ) {
   try {
-    const { slug } = params;
+    const decodedSlug = decodeURIComponent(params.slug);
 
     // Secure DELETE: Allow only admin role
     const token = request.cookies.get('auth_token')?.value;
@@ -138,7 +135,7 @@ export async function DELETE(
 
     const [result] = await pool.query<ResultSetHeader>(
       'DELETE FROM articles WHERE slug = ?',
-      [slug]
+      [decodedSlug]
     );
 
     if (result.affectedRows === 0) {
@@ -146,8 +143,8 @@ export async function DELETE(
     }
 
     return NextResponse.json({ success: true, message: 'Article deleted' });
-  } catch (error) {
+  } catch (error: any) {
     console.error('DELETE /api/articles/[slug] error:', error);
-    return NextResponse.json({ error: 'Failed to delete article' }, { status: 500 });
+    return NextResponse.json({ error: error.message || 'Failed to delete article' }, { status: 500 });
   }
 }

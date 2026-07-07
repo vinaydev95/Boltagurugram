@@ -197,8 +197,9 @@ export default function EditArticlePage({ params }: { params: { slug: string } }
       } else {
         alert(data.error || 'Failed to update article');
       }
-    } catch {
-      alert('Error updating article');
+    } catch (err: any) {
+      console.error('Error updating article:', err);
+      alert(`Error updating article: ${err?.message || err || 'Unknown error'}`);
     } finally {
       setSaving(false);
     }

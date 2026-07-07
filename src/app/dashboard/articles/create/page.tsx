@@ -176,8 +176,9 @@ export default function CreateArticlePage() {
       } else {
         alert(data.error || 'Failed to save article');
       }
-    } catch {
-      alert('Error saving article');
+    } catch (err: any) {
+      console.error('Error saving article:', err);
+      alert(`Error saving article: ${err?.message || err || 'Unknown error'}`);
     } finally {
       setSaving(false);
     }

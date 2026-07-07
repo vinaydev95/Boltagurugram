@@ -7,24 +7,26 @@ import { getArticlesByCategoryDB, getCategoryBySlugDB, getTrendingArticlesDB } f
 export const dynamic = 'force-dynamic';
 
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
-  const cat = await getCategoryBySlugDB(params.slug);
-  const name = cat?.name || params.slug.charAt(0).toUpperCase() + params.slug.slice(1);
+  const decodedSlug = decodeURIComponent(params.slug);
+  const cat = await getCategoryBySlugDB(decodedSlug);
+  const name = cat?.name || decodedSlug.charAt(0).toUpperCase() + decodedSlug.slice(1);
   return {
     title: `${name} News | Bolta Gurugram`,
     description: `Latest breaking news, updates, and analysis on ${name}. Stay updated with Bolta Gurugram.`,
     openGraph: {
       title: `${name} News | Bolta Gurugram`,
       description: `Latest breaking news, updates, and analysis on ${name}. Stay updated with Bolta Gurugram.`,
-      url: `https://boltagurugram.com/category/${params.slug}`,
+      url: `https://boltagurugram.com/category/${decodedSlug}`,
       siteName: 'Bolta Gurugram',
     }
   }
 }
 
 export default async function CategoryPage({ params }: { params: { slug: string } }) {
-  const cat = await getCategoryBySlugDB(params.slug);
-  const categoryName = cat?.name || params.slug.charAt(0).toUpperCase() + params.slug.slice(1);
-  const categoryArticles = await getArticlesByCategoryDB(params.slug, 20);
+  const decodedSlug = decodeURIComponent(params.slug);
+  const cat = await getCategoryBySlugDB(decodedSlug);
+  const categoryName = cat?.name || decodedSlug.charAt(0).toUpperCase() + decodedSlug.slice(1);
+  const categoryArticles = await getArticlesByCategoryDB(decodedSlug, 20);
   const trending = await getTrendingArticlesDB(4);
   const featuredArticle = categoryArticles[0];
   const listArticles = categoryArticles.slice(1);
