@@ -22,7 +22,9 @@ export async function POST(request: NextRequest) {
 
       if (rows.length > 0) {
         const reporter = rows[0];
-        user = { email: reporter.email, role: 'reporter', name: reporter.name };
+        // Use the role from database (normalized to lowercase) if it exists, otherwise default to 'reporter'
+        const userRole = reporter.role ? reporter.role.toLowerCase() : 'reporter';
+        user = { email: reporter.email, role: userRole, name: reporter.name };
       }
     }
 
