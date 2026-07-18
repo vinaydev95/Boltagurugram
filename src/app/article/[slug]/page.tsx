@@ -194,6 +194,20 @@ export default async function ArticlePage({ params }: { params: { slug: string }
               )}
             </div>
 
+            {/* Meta Description in Bold */}
+            {article.meta_description && (
+              <div style={{ 
+                fontSize: '1.2rem', 
+                fontWeight: 'bold', 
+                lineHeight: '1.7', 
+                color: '#111827', 
+                marginTop: '1.5rem', 
+                marginBottom: '1.5rem'
+              }}>
+                {article.meta_description}
+              </div>
+            )}
+
             {/* Article Body */}
             <div style={{ fontSize: '1.15rem', lineHeight: '1.8', color: '#374151' }} dangerouslySetInnerHTML={{ __html: article.content || '' }} />
 

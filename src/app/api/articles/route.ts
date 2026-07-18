@@ -102,10 +102,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Title is required' }, { status: 400 });
     }
 
-    // Generate slug from title - support Unicode letters/numbers (e.g. Hindi)
-    const rawSlug = title
+    // Use meta_title if provided for the URL/slug, otherwise fall back to title
+    const slugSource = meta_title && meta_title.trim().length > 0 ? meta_title : title;
+
+    // Generate slug from slugSource - support Unicode letters/numbers/marks (e.g. Hindi)
+    const rawSlug = slugSource
       .toLowerCase()
-      .replace(new RegExp('[^\\p{L}\\p{N}\\s-]', 'gu'), '') // Support Unicode letters & numbers
+      .replace(new RegExp('[^\\p{L}\\p{N}\\p{M}\\s-]', 'gu'), '') // Support Unicode letters, numbers & marks
       .replace(/\s+/g, '-')
       .replace(/-+/g, '-')
       .replace(/^-+|-+$/g, '')  // trim leading/trailing dashes
