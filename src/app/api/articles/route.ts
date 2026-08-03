@@ -96,7 +96,8 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { title, excerpt, content, image_url, meta_title, meta_description, category_id, author, status, tags, featured, read_time } = body;
+    const { title, excerpt, content, image_url, meta_title, meta_description, category_ids, author, status, tags, featured, read_time } = body;
+    const category_id = Array.isArray(category_ids) && category_ids.length > 0 ? category_ids[0] : null;
 
     if (!title) {
       return NextResponse.json({ error: 'Title is required' }, { status: 400 });
@@ -146,6 +147,13 @@ export async function POST(request: NextRequest) {
         read_time || '3 min',
       ]
     );
+    
+    // Insert into article_categories junction table
+    if (Array.isArray(category_ids) && category_ids.length > 0) {
+      for (const catId of category_ids) {
+        await pool.query('INSERT IGNORE INTO article_categories (article_id, category_id) VALUES (?, ?)', [result.insertId, catId]);
+      }
+    }
 
     // Fetch the created article
     const [newArticle] = await pool.query<RowDataPacket[]>(

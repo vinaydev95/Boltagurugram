@@ -48,7 +48,8 @@ export async function GET() {
     const [categoryBreakdown] = await pool.query<RowDataPacket[]>(
       `SELECT c.id, c.name, c.slug, c.color, COUNT(a.id) as article_count
        FROM categories c
-       LEFT JOIN articles a ON c.id = a.category_id
+       LEFT JOIN article_categories ac ON c.id = ac.category_id
+      LEFT JOIN articles a ON ac.article_id = a.id
        GROUP BY c.id
        ORDER BY article_count DESC`
     );

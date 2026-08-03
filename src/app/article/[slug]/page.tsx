@@ -3,6 +3,7 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import Link from 'next/link';
 import { getArticleBySlugDB, getRelatedArticlesDB, getLatestArticlesDB, incrementArticleViewsDB } from '@/lib/db-queries';
+import AdBanner from '@/components/AdBanner';
 
 export const dynamic = 'force-dynamic';
 
@@ -94,9 +95,7 @@ export default async function ArticlePage({ params }: { params: { slug: string }
           {/* Main Article Content */}
           <article style={{ backgroundColor: 'white', padding: '2.5rem', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
 
-            <Link href={`/category/${catSlug}`}>
-              <span style={{ backgroundColor: 'var(--primary-color)', color: 'white', padding: '0.25rem 0.75rem', borderRadius: '4px', fontSize: '0.85rem', fontWeight: 'bold', textTransform: 'uppercase', marginBottom: '1rem', display: 'inline-block', cursor: 'pointer' }}>{article.category_name}</span>
-            </Link>
+
 
             <h1 className="article-title">{article.title}</h1>
 
@@ -240,10 +239,8 @@ export default async function ArticlePage({ params }: { params: { slug: string }
                   </li>
                 ))}
               </ul>
-            </div>
-
-            <div style={{ height: '250px', backgroundColor: '#f3f4f6', border: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#9ca3af', fontSize: '0.85rem' }}>
-              Advertisement
+              {/* Advertisement */}
+              <AdBanner position="article_bottom" />
             </div>
 
             {/* Newsletter box */}

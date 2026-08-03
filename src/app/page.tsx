@@ -1,6 +1,8 @@
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import Link from 'next/link';
+import Image from 'next/image';
+import AdBanner from '@/components/AdBanner';
 import { getLatestArticlesDB, getTrendingArticlesDB, getArticlesByCategoryDB } from '@/lib/db-queries';
 
 // Force dynamic rendering so data is always fresh
@@ -43,7 +45,7 @@ export default async function Home() {
             <Link href={`/article/${heroArticle.slug}`}>
               <div className="hero-section" style={{ backgroundImage: heroArticle.image_url ? `url(${heroArticle.image_url})` : 'none' }}>
                 <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '2rem', background: 'linear-gradient(transparent, rgba(0,0,0,0.9))', color: 'white' }}>
-                  <span style={{ backgroundColor: 'var(--primary-color)', padding: '0.3rem 0.6rem', borderRadius: '4px', fontSize: '0.8rem', fontWeight: 'bold', textTransform: 'uppercase', marginBottom: '1rem', display: 'inline-block' }}>{heroArticle.category_name} Breaking</span>
+
                   <h2 className="hero-title">{heroArticle.title}</h2>
                   <p style={{ fontSize: '1.1rem', color: '#d1d5db', marginBottom: '1rem' }}>{heroArticle.excerpt}</p>
                   <span style={{ fontSize: '0.85rem', color: '#9ca3af' }}>By {heroArticle.author} • {heroArticle.date}</span>
@@ -84,16 +86,13 @@ export default async function Home() {
                     <span style={{ fontSize: '2.5rem', fontWeight: '900', color: '#e5e7eb', lineHeight: '1' }}>0{index + 1}</span>
                     <div>
                       <h4 style={{ fontSize: '0.95rem', fontWeight: 'bold', lineHeight: '1.4', marginBottom: '0.25rem' }}>{article.title}</h4>
-                      <span style={{ fontSize: '0.75rem', color: 'var(--text-light)' }}>{article.viewsFormatted} Views</span>
                     </div>
                   </div>
                 </Link>
               ))}
             </div>
 
-            <div style={{ marginTop: '2rem', height: '250px', backgroundColor: '#f3f4f6', border: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#9ca3af', fontSize: '0.85rem' }}>
-              Advertisement Space
-            </div>
+            <AdBanner position="home_banner" />
           </aside>
         </div>
 

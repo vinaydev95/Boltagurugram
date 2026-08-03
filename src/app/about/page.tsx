@@ -146,10 +146,10 @@ export default function AboutPage() {
               हमें फॉलो करें | Follow Us
             </h2>
             <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', marginTop: '1rem' }}>
-              <a href="https://www.facebook.com/share/1D3Z7etPtB/" target="_blank" rel="noopener noreferrer" style={{ backgroundColor: '#1877F2', color: 'white', padding: '0.6rem 1.2rem', borderRadius: '6px', textDecoration: 'none', fontWeight: 'bold', fontSize: '0.9rem' }}>Facebook</a>
-              <a href="https://www.instagram.com/boltagurugram?utm_source=qr&igsh=cXhtYmt2ZGx2MG5m" target="_blank" rel="noopener noreferrer" style={{ backgroundColor: '#E1306C', color: 'white', padding: '0.6rem 1.2rem', borderRadius: '6px', textDecoration: 'none', fontWeight: 'bold', fontSize: '0.9rem' }}>Instagram</a>
-              <a href="https://x.com/BoltaGurugram" target="_blank" rel="noopener noreferrer" style={{ backgroundColor: '#000000', color: 'white', padding: '0.6rem 1.2rem', borderRadius: '6px', textDecoration: 'none', fontWeight: 'bold', fontSize: '0.9rem' }}>Twitter / X</a>
               <a href="https://youtube.com/@boltagurugram?si=3svBMOKcdBsMfoeT" target="_blank" rel="noopener noreferrer" style={{ backgroundColor: '#FF0000', color: 'white', padding: '0.6rem 1.2rem', borderRadius: '6px', textDecoration: 'none', fontWeight: 'bold', fontSize: '0.9rem' }}>YouTube</a>
+              <a href="https://www.facebook.com/share/1D3Z7etPtB/" target="_blank" rel="noopener noreferrer" style={{ backgroundColor: '#1877F2', color: 'white', padding: '0.6rem 1.2rem', borderRadius: '6px', textDecoration: 'none', fontWeight: 'bold', fontSize: '0.9rem' }}>Facebook</a>
+              <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" style={{ backgroundColor: '#0077b5', color: 'white', padding: '0.6rem 1.2rem', borderRadius: '6px', textDecoration: 'none', fontWeight: 'bold', fontSize: '0.9rem' }}>LinkedIn</a>
+              <a href="https://x.com/BoltaGurugram" target="_blank" rel="noopener noreferrer" style={{ backgroundColor: '#000000', color: 'white', padding: '0.6rem 1.2rem', borderRadius: '6px', textDecoration: 'none', fontWeight: 'bold', fontSize: '0.9rem' }}>Twitter / X</a>
             </div>
             
             <p style={{ textAlign: 'center', marginTop: '3rem', color: 'var(--text-light)', fontSize: '0.9rem', borderTop: '1px solid #e5e7eb', paddingTop: '1.5rem' }}>

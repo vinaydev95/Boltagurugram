@@ -2,6 +2,7 @@ import { Metadata } from 'next';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import Link from 'next/link';
+import AdBanner from '@/components/AdBanner';
 import { getArticlesByCategoryDB, getCategoryBySlugDB, getTrendingArticlesDB } from '@/lib/db-queries';
 
 export const dynamic = 'force-dynamic';
@@ -37,8 +38,7 @@ export default async function CategoryPage({ params }: { params: { slug: string 
 
       <main style={{ maxWidth: '1200px', margin: '2rem auto', padding: '0 1rem', flex: 1, width: '100%' }}>
         <div style={{ borderBottom: '3px solid var(--primary-color)', paddingBottom: '1rem', marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
-          <h1 className="page-title">{categoryName} NEWS</h1>
-          <span style={{ backgroundColor: '#e5e7eb', color: 'var(--text-light)', padding: '0.25rem 0.75rem', borderRadius: '20px', fontSize: '0.85rem', fontWeight: 'bold' }}>{categoryArticles.length} Articles</span>
+          <h1 className="page-title">LATEST NEWS</h1>
         </div>
 
         {categoryArticles.length === 0 ? (
@@ -109,10 +109,7 @@ export default async function CategoryPage({ params }: { params: { slug: string 
                   ))}
                 </ul>
               </div>
-
-              <div style={{ height: '300px', backgroundColor: '#f3f4f6', border: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#9ca3af', fontSize: '0.85rem' }}>
-                Sidebar Advertisement
-              </div>
+              <AdBanner position="sidebar" />
             </aside>
           </div>
         )}

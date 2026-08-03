@@ -140,6 +140,23 @@ export default function DashboardLayout({
             {user?.role === 'admin' && (
               <li>
                 <Link 
+                  href="/dashboard/ads" 
+                  onClick={() => setSidebarOpen(false)} 
+                  style={{ 
+                    display: 'block', 
+                    padding: '0.75rem 1rem', 
+                    borderRadius: '4px',
+                    backgroundColor: isActive('/dashboard/ads') ? '#374151' : 'transparent',
+                    color: 'white'
+                  }}
+                >
+                  Advertisements
+                </Link>
+              </li>
+            )}
+            {user?.role === 'admin' && (
+              <li>
+                <Link 
                   href="/dashboard/reporters" 
                   onClick={() => setSidebarOpen(false)} 
                   style={{ 

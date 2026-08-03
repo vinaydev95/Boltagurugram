@@ -23,8 +23,17 @@ export async function GET(
       return NextResponse.json({ error: 'Article not found' }, { status: 404 });
     }
 
-    // Fetch related articles (same category, exclude current)
     const article = rows[0];
+
+    // Fetch all category IDs from junction table
+    const [catRows] = await pool.query<RowDataPacket[]>(
+      'SELECT category_id FROM article_categories WHERE article_id = ?',
+      [article.id]
+    );
+    article.category_ids = catRows.map(row => row.category_id);
+
+
+    // Fetch related articles (same category, exclude current)
     const [related] = await pool.query<RowDataPacket[]>(
       `SELECT a.slug, a.title, a.excerpt, a.views, a.read_time, a.created_at,
               c.name as category_name, c.slug as category_slug
@@ -50,7 +59,8 @@ export async function PUT(
   try {
     const decodedSlug = decodeURIComponent(params.slug);
     const body = await request.json();
-    const { title, excerpt, content, image_url, meta_title, meta_description, category_id, author, status, tags, featured, read_time } = body;
+    const { title, excerpt, content, image_url, meta_title, meta_description, category_ids, author, status, tags, featured, read_time } = body;
+    const category_id = Array.isArray(category_ids) && category_ids.length > 0 ? category_ids[0] : null;
 
     // Check if article exists
     const [existing] = await pool.query<RowDataPacket[]>(
@@ -94,6 +104,16 @@ export async function PUT(
       `UPDATE articles SET ${updates.join(', ')} WHERE slug = ?`,
       updateParams
     );
+
+    // Sync article_categories table
+    if (Array.isArray(category_ids)) {
+      await pool.query('DELETE FROM article_categories WHERE article_id = ?', [existing[0].id]);
+      if (category_ids.length > 0) {
+        for (const catId of category_ids) {
+          await pool.query('INSERT IGNORE INTO article_categories (article_id, category_id) VALUES (?, ?)', [existing[0].id, catId]);
+        }
+      }
+    }
 
     // Fetch updated article
     const [updated] = await pool.query<RowDataPacket[]>(

@@ -102,9 +102,17 @@ ul {
   gap: 2rem;
   padding: 1rem;
   overflow-x: auto;
+  overflow-y: hidden;
   font-weight: bold;
   font-size: 0.95rem;
+  white-space: nowrap;
   -webkit-overflow-scrolling: touch;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.header-nav ul::-webkit-scrollbar {
+  display: none;
 }
 
 /* Hamburger button */

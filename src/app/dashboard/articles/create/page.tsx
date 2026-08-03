@@ -19,7 +19,7 @@ export default function CreateArticlePage() {
   const [headline, setHeadline] = useState('');
   const [content, setContent] = useState('');
   const [excerpt, setExcerpt] = useState('');
-  const [categoryId, setCategoryId] = useState('');
+  const [categoryIds, setCategoryIds] = useState<number[]>([]);
   const [tags, setTags] = useState('');
   const [imageUrl, setImageUrl] = useState('');
   const [metaTitle, setMetaTitle] = useState('');
@@ -140,8 +140,8 @@ export default function CreateArticlePage() {
       alert('Please enter a headline.');
       return;
     }
-    if (status === 'Published' && (!content || !categoryId)) {
-      alert('Please fill in Content and select a Category before publishing.');
+    if (status === 'Published' && (!content || categoryIds.length === 0)) {
+      alert('Please fill in Content and select at least one Category before publishing.');
       return;
     }
 
@@ -156,7 +156,7 @@ export default function CreateArticlePage() {
           title: headline,
           excerpt: excerpt || headline.substring(0, 150),
           content: content,
-          category_id: categoryId ? parseInt(categoryId) : null,
+          category_ids: categoryIds,
           image_url: imageUrl || null,
           meta_title: metaTitle || null,
           meta_description: metaDesc || null,
@@ -388,13 +388,29 @@ export default function CreateArticlePage() {
             <h3 style={{ fontSize: '1.1rem', fontWeight: 'bold', marginBottom: '1rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.5rem' }}>Article Settings</h3>
 
             <div style={{ marginBottom: '1.5rem' }}>
-              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500', fontSize: '0.9rem' }}>Category</label>
-              <select value={categoryId} onChange={(e) => setCategoryId(e.target.value)} style={{ width: '100%', padding: '0.75rem', borderRadius: '6px', border: '1px solid var(--border-color)', backgroundColor: 'white' }}>
-                <option value="">Select Category</option>
+              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500', fontSize: '0.9rem' }}>Categories (Check multiple, first is Primary)</label>
+              <div style={{ maxHeight: '200px', overflowY: 'auto', border: '1px solid var(--border-color)', borderRadius: '6px', padding: '0.5rem', backgroundColor: 'white' }}>
                 {categories.map(c => (
-                  <option key={c.id} value={c.id}>{c.name}</option>
+                  <label key={c.id} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem', cursor: 'pointer', borderBottom: '1px solid #f3f4f6' }}>
+                    <input 
+                      type="checkbox" 
+                      checked={categoryIds.includes(c.id)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setCategoryIds(prev => [...prev, c.id]);
+                        } else {
+                          setCategoryIds(prev => prev.filter(id => id !== c.id));
+                        }
+                      }}
+                    />
+                    <span>{c.name}</span>
+                    {categoryIds[0] === c.id && (
+                      <span style={{ fontSize: '0.7rem', backgroundColor: 'var(--primary-color)', color: 'white', padding: '0.1rem 0.3rem', borderRadius: '4px', marginLeft: 'auto' }}>Primary</span>
+                    )}
+                  </label>
                 ))}
-              </select>
+                {categories.length === 0 && <div style={{ padding: '0.5rem', color: '#6b7280', fontSize: '0.9rem' }}>No categories available</div>}
+              </div>
             </div>
 
             <div style={{ marginBottom: '1.5rem' }}>

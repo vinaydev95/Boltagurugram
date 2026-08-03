@@ -110,10 +110,10 @@ export default function ContactPage() {
                 Follow Our Network
               </h3>
               <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-                <a href="https://www.facebook.com/share/1D3Z7etPtB/" target="_blank" rel="noopener noreferrer" style={{ backgroundColor: '#1877F2', color: 'white', padding: '0.5rem 1rem', borderRadius: '6px', textDecoration: 'none', fontWeight: 'bold', fontSize: '0.8rem' }}>Facebook</a>
-                <a href="https://www.instagram.com/boltagurugram?utm_source=qr&igsh=cXhtYmt2ZGx2MG5m" target="_blank" rel="noopener noreferrer" style={{ backgroundColor: '#E1306C', color: 'white', padding: '0.5rem 1rem', borderRadius: '6px', textDecoration: 'none', fontWeight: 'bold', fontSize: '0.8rem' }}>Instagram</a>
-                <a href="https://x.com/BoltaGurugram" target="_blank" rel="noopener noreferrer" style={{ backgroundColor: '#000000', color: 'white', padding: '0.5rem 1rem', borderRadius: '6px', textDecoration: 'none', fontWeight: 'bold', fontSize: '0.8rem' }}>Twitter / X</a>
                 <a href="https://youtube.com/@boltagurugram?si=3svBMOKcdBsMfoeT" target="_blank" rel="noopener noreferrer" style={{ backgroundColor: '#FF0000', color: 'white', padding: '0.5rem 1rem', borderRadius: '6px', textDecoration: 'none', fontWeight: 'bold', fontSize: '0.8rem' }}>YouTube</a>
+                <a href="https://www.facebook.com/share/1D3Z7etPtB/" target="_blank" rel="noopener noreferrer" style={{ backgroundColor: '#1877F2', color: 'white', padding: '0.5rem 1rem', borderRadius: '6px', textDecoration: 'none', fontWeight: 'bold', fontSize: '0.8rem' }}>Facebook</a>
+                <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" style={{ backgroundColor: '#0077b5', color: 'white', padding: '0.5rem 1rem', borderRadius: '6px', textDecoration: 'none', fontWeight: 'bold', fontSize: '0.8rem' }}>LinkedIn</a>
+                <a href="https://x.com/BoltaGurugram" target="_blank" rel="noopener noreferrer" style={{ backgroundColor: '#000000', color: 'white', padding: '0.5rem 1rem', borderRadius: '6px', textDecoration: 'none', fontWeight: 'bold', fontSize: '0.8rem' }}>Twitter / X</a>
               </div>
             </div>
 

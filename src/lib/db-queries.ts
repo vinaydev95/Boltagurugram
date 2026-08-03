@@ -95,10 +95,12 @@ export async function getTrendingArticlesDB(count: number = 5) {
 
 export async function getArticlesByCategoryDB(categorySlug: string, count: number = 10) {
   const [rows] = await pool.query<RowDataPacket[]>(
-    `SELECT a.*, c.name as category_name, c.slug as category_slug, c.color as category_color
+    `SELECT a.*, c_primary.name as category_name, c_primary.slug as category_slug, c_primary.color as category_color
      FROM articles a
-     LEFT JOIN categories c ON a.category_id = c.id
-     WHERE c.slug = ? AND a.status = 'Published'
+     JOIN article_categories ac ON a.id = ac.article_id
+     JOIN categories c_search ON ac.category_id = c_search.id
+     LEFT JOIN categories c_primary ON a.category_id = c_primary.id
+     WHERE c_search.slug = ? AND a.status = 'Published'
      ORDER BY a.created_at DESC
      LIMIT ?`,
     [categorySlug, count]
@@ -167,7 +169,8 @@ export async function getCategoriesDB() {
   const [rows] = await pool.query<RowDataPacket[]>(
     `SELECT c.*, COUNT(a.id) as article_count
      FROM categories c
-     LEFT JOIN articles a ON c.id = a.category_id AND a.status = 'Published'
+     LEFT JOIN article_categories ac ON c.id = ac.category_id
+     LEFT JOIN articles a ON ac.article_id = a.id AND a.status = 'Published'
      GROUP BY c.id
      ORDER BY c.sort_order ASC, c.name ASC`
   );
