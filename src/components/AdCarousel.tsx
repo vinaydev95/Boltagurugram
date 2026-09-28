@@ -16,11 +16,7 @@ export default function AdCarousel({ ads }: { ads: any[] }) {
   }, [ads.length]);
 
   if (ads.length === 0) {
-    return (
-      <div style={{ marginTop: '2rem', height: '250px', backgroundColor: '#f3f4f6', border: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#9ca3af', fontSize: '0.85rem', width: '100%' }}>
-        Advertisement Space
-      </div>
-    );
+    return null;
   }
 
   const ad = ads[activeIndex];

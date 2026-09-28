@@ -265,6 +265,16 @@ ul {
   overflow: hidden;
 }
 
+/* Article body text */
+.article-body {
+  font-size: 1.15rem;
+}
+
+/* Article meta description */
+.article-meta-desc {
+  font-size: 1.2rem;
+}
+
 /* Article title */
 .article-title {
   font-size: 3rem;
@@ -455,6 +465,18 @@ ul {
 
   .article-featured-img {
     height: 220px;
+  }
+
+  .article-body {
+    font-size: 1rem;
+  }
+
+  .article-meta-desc {
+    font-size: 1.05rem;
+  }
+
+  .article-card {
+    padding: 1rem !important;
   }
 
   /* Search / Category cards */

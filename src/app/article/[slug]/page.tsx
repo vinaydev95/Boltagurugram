@@ -4,6 +4,9 @@ import Footer from '@/components/Footer';
 import Link from 'next/link';
 import { getArticleBySlugDB, getRelatedArticlesDB, getLatestArticlesDB, incrementArticleViewsDB } from '@/lib/db-queries';
 import AdBanner from '@/components/AdBanner';
+import ArticleContentWithAd from '@/components/ArticleContentWithAd';
+import pool from '@/lib/db';
+import { RowDataPacket } from 'mysql2';
 
 export const dynamic = 'force-dynamic';
 
@@ -75,6 +78,17 @@ export default async function ArticlePage({ params }: { params: { slug: string }
   const catSlug = article.category_slug || article.category_name?.toLowerCase();
   const tags = article.tagsArray || [];
 
+  // Fetch all active ads for the mid-article client component
+  let midAds: any[] = [];
+  try {
+    const [rows] = await pool.query<RowDataPacket[]>(
+      'SELECT * FROM advertisements WHERE active = 1 AND (expires_at IS NULL OR expires_at > NOW()) AND (starts_at IS NULL OR starts_at <= NOW()) ORDER BY id DESC'
+    );
+    midAds = rows;
+  } catch (e) {
+    // Silent fail
+  }
+
   return (
     <div style={{ backgroundColor: 'var(--bg-color)', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       <Header />
@@ -93,7 +107,10 @@ export default async function ArticlePage({ params }: { params: { slug: string }
         <div className="grid-article">
 
           {/* Main Article Content */}
-          <article style={{ backgroundColor: 'white', padding: '2.5rem', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
+          <article className="article-card" style={{ backgroundColor: 'white', padding: '2.5rem', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
+
+            {/* Top Ad */}
+            <AdBanner />
 
 
 
@@ -195,8 +212,7 @@ export default async function ArticlePage({ params }: { params: { slug: string }
 
             {/* Meta Description in Bold */}
             {article.meta_description && (
-              <div style={{ 
-                fontSize: '1.2rem', 
+              <div className="article-meta-desc" style={{ 
                 fontWeight: 'bold', 
                 lineHeight: '1.7', 
                 color: '#111827', 
@@ -207,8 +223,8 @@ export default async function ArticlePage({ params }: { params: { slug: string }
               </div>
             )}
 
-            {/* Article Body */}
-            <div style={{ fontSize: '1.15rem', lineHeight: '1.8', color: '#374151' }} dangerouslySetInnerHTML={{ __html: article.content || '' }} />
+            {/* Article Body with Mid Ad */}
+            <ArticleContentWithAd content={article.content || ''} midAds={midAds} />
 
             {/* Article Tags */}
             {tags.length > 0 && (
@@ -219,6 +235,9 @@ export default async function ArticlePage({ params }: { params: { slug: string }
                 ))}
               </div>
             )}
+
+            {/* Bottom Ad */}
+            <AdBanner />
           </article>
 
           {/* Right Sidebar */}
@@ -240,7 +259,7 @@ export default async function ArticlePage({ params }: { params: { slug: string }
                 ))}
               </ul>
               {/* Advertisement */}
-              <AdBanner position="article_bottom" />
+              <AdBanner />
             </div>
 
             {/* Newsletter box */}

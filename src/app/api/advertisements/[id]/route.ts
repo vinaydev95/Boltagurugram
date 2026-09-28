@@ -35,6 +35,12 @@ export async function PUT(
       values.push(data.active ? 1 : 0);
     }
     
+    if (data.starts_at !== undefined) {
+      updates.push('starts_at = ?');
+      const startsAt = data.starts_at ? new Date(data.starts_at) : null;
+      values.push(startsAt);
+    }
+    
     if (data.expires_at !== undefined) {
       updates.push('expires_at = ?');
       const expiresAt = data.expires_at ? new Date(data.expires_at) : null;

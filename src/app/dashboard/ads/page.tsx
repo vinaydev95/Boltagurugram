@@ -5,45 +5,80 @@ import { useAuth } from '@/lib/AuthContext';
 import { useRouter } from 'next/navigation';
 import MediaPicker from '@/components/MediaPicker';
 
-const LiveTimer = ({ expiresAt }: { expiresAt: string }) => {
+const LiveTimer = ({ startsAt, expiresAt }: { startsAt?: string; expiresAt: string }) => {
   const [timeLeft, setTimeLeft] = useState('');
+  const [status, setStatus] = useState<'not_started' | 'active' | 'expired' | 'none'>('none');
 
   useEffect(() => {
-    if (!expiresAt) return;
-    const targetDate = new Date(expiresAt).getTime();
-    
+    const now = new Date().getTime();
+    const startDate = startsAt ? new Date(startsAt).getTime() : null;
+    const endDate = expiresAt ? new Date(expiresAt).getTime() : null;
+
+    if (!endDate && !startDate) { setStatus('none'); return; }
+
     const updateTimer = () => {
       const now = new Date().getTime();
-      const difference = targetDate - now;
 
-      if (difference <= 0) {
+      // Check if not started yet
+      if (startDate && now < startDate) {
+        setStatus('not_started');
+        const diff = startDate - now;
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+        let display = '';
+        if (days > 0) display += `${days}d `;
+        display += `${hours}h ${minutes}m ${seconds}s`;
+        setTimeLeft(display);
+        return;
+      }
+
+      // Check if expired
+      if (endDate && now > endDate) {
+        setStatus('expired');
         setTimeLeft('Expired');
         return;
       }
 
-      const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-      const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
-      const seconds = Math.floor((difference % (1000 * 60)) / 1000);
-      const days = Math.floor(difference / (1000 * 60 * 60 * 24));
-
-      let display = '';
-      if (days > 0) display += `${days}d `;
-      display += `${hours}h ${minutes}m ${seconds}s`;
-      setTimeLeft(display);
+      // Active - show time remaining until end
+      if (endDate) {
+        setStatus('active');
+        const diff = endDate - now;
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+        let display = '';
+        if (days > 0) display += `${days}d `;
+        display += `${hours}h ${minutes}m ${seconds}s`;
+        setTimeLeft(display);
+      } else {
+        setStatus('active');
+        setTimeLeft('');
+      }
     };
 
     updateTimer();
     const interval = setInterval(updateTimer, 1000);
     return () => clearInterval(interval);
-  }, [expiresAt]);
+  }, [startsAt, expiresAt]);
 
-  if (!expiresAt) return null;
+  if (status === 'none') return null;
   
-  if (timeLeft === 'Expired') {
+  if (status === 'expired') {
     return <span style={{ fontSize: '0.75rem', color: '#ef4444', backgroundColor: '#fee2e2', padding: '0.1rem 0.3rem', borderRadius: '4px', marginLeft: '0.5rem' }}>Expired</span>;
   }
 
-  return <span style={{ fontSize: '0.75rem', color: '#3b82f6', backgroundColor: '#eff6ff', padding: '0.1rem 0.3rem', borderRadius: '4px', marginLeft: '0.5rem' }}>Expires in {timeLeft}</span>;
+  if (status === 'not_started') {
+    return <span style={{ fontSize: '0.75rem', color: '#f59e0b', backgroundColor: '#fef3c7', padding: '0.1rem 0.3rem', borderRadius: '4px', marginLeft: '0.5rem' }}>Starts in {timeLeft}</span>;
+  }
+
+  if (timeLeft) {
+    return <span style={{ fontSize: '0.75rem', color: '#3b82f6', backgroundColor: '#eff6ff', padding: '0.1rem 0.3rem', borderRadius: '4px', marginLeft: '0.5rem' }}>Ends in {timeLeft}</span>;
+  }
+
+  return null;
 };
 
 export default function AdsPage() {
@@ -53,6 +88,7 @@ export default function AdsPage() {
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isMediaPickerOpen, setIsMediaPickerOpen] = useState(false);
+  const [publishMode, setPublishMode] = useState<'immediate' | 'scheduled'>('immediate');
   
   const [formData, setFormData] = useState({
     id: null as number | null,
@@ -60,6 +96,7 @@ export default function AdsPage() {
     position: ['home_banner'] as string[],
     image_url: '',
     target_url: '',
+    starts_at: '' as string | null,
     expires_at: '' as string | null,
     active: true
   });
@@ -88,27 +125,43 @@ export default function AdsPage() {
   };
 
   const openAddModal = () => {
-    setFormData({ id: null, title: '', position: ['home_banner'], image_url: '', target_url: '', expires_at: '', active: true });
+    setFormData({ id: null, title: '', position: ['home_banner'], image_url: '', target_url: '', starts_at: '', expires_at: '', active: true });
+    setPublishMode('immediate');
     setIsModalOpen(true);
   };
 
   const openEditModal = (ad: any) => {
+    let localStartsAt = '';
+    if (ad.starts_at) {
+      const d = new Date(ad.starts_at);
+      d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+      localStartsAt = d.toISOString().slice(0, 16);
+    }
     let localExpiresAt = '';
     if (ad.expires_at) {
       const d = new Date(ad.expires_at);
-      d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
-      localExpiresAt = d.toISOString().slice(0, 16);
+      localExpiresAt = d.toISOString().slice(0, 10);
     }
-    setFormData({ ...ad, position: ad.position ? ad.position.split(',') : [], expires_at: localExpiresAt });
+    // Detect mode: if starts_at exists and is in the future, it was scheduled
+    const isScheduled = ad.starts_at && new Date(ad.starts_at).getTime() > Date.now();
+    setPublishMode(isScheduled ? 'scheduled' : 'immediate');
+    setFormData({ ...ad, position: ad.position ? ad.position.split(',') : [], starts_at: localStartsAt, expires_at: localExpiresAt });
     setIsModalOpen(true);
   };
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      // starts_at: null for immediate, datetime value for scheduled
+      const startsAtValue = publishMode === 'scheduled' && formData.starts_at ? formData.starts_at : null;
+      // Build expires_at: end of the day (23:59)
+      const expiresAtValue = formData.expires_at ? `${formData.expires_at}T23:59:00` : null;
+
       const payload = {
         ...formData,
-        position: formData.position.join(',')
+        position: formData.position.join(','),
+        starts_at: startsAtValue,
+        expires_at: expiresAtValue,
       };
       if (formData.id) {
         await fetch(`/api/advertisements/${formData.id}`, {
@@ -171,14 +224,13 @@ export default function AdsPage() {
               <th style={{ padding: '1rem' }}>Banner</th>
               <th style={{ padding: '1rem' }}>Title</th>
               <th style={{ padding: '1rem' }}>Position</th>
-              <th style={{ padding: '1rem' }}>Target URL</th>
               <th style={{ padding: '1rem' }}>Status</th>
               <th style={{ padding: '1rem' }}>Actions</th>
             </tr>
           </thead>
           <tbody>
             {ads.length === 0 ? (
-              <tr><td colSpan={6} style={{ padding: '2rem', textAlign: 'center', color: '#6b7280' }}>No advertisements found</td></tr>
+              <tr><td colSpan={5} style={{ padding: '2rem', textAlign: 'center', color: '#6b7280' }}>No advertisements found</td></tr>
             ) : ads.map(ad => (
               <tr key={ad.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
                 <td style={{ padding: '1rem' }}>
@@ -186,13 +238,13 @@ export default function AdsPage() {
                 </td>
                 <td style={{ padding: '1rem', fontWeight: '500' }}>{ad.title}</td>
                 <td style={{ padding: '1rem' }}>{ad.position}</td>
-                <td style={{ padding: '1rem', maxWidth: '150px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}><a href={ad.target_url} target="_blank" rel="noreferrer" style={{color: '#3b82f6'}}>{ad.target_url}</a></td>
+
                 <td style={{ padding: '1rem' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                     <button onClick={() => toggleActive(ad)} style={{ padding: '0.25rem 0.5rem', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 'bold', border: 'none', cursor: 'pointer', backgroundColor: ad.active ? '#dcfce7' : '#fee2e2', color: ad.active ? '#166534' : '#991b1b' }}>
                       {ad.active ? 'Active' : 'Inactive'}
                     </button>
-                    <LiveTimer expiresAt={ad.expires_at} />
+                    <LiveTimer startsAt={ad.starts_at} expiresAt={ad.expires_at} />
                   </div>
                 </td>
                 <td style={{ padding: '1rem' }}>
@@ -217,7 +269,7 @@ export default function AdsPage() {
               <div>
                 <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold', fontSize: '0.9rem' }}>Positions</label>
                 <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-                  {['home_banner', 'sidebar', 'article_bottom'].map(pos => (
+                  {['home_banner', 'sidebar', 'article_top', 'article_mid', 'article_bottom'].map(pos => (
                     <label key={pos} style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', cursor: 'pointer' }}>
                       <input 
                         type="checkbox" 
@@ -230,33 +282,67 @@ export default function AdsPage() {
                           }
                         }} 
                       />
-                      {pos === 'home_banner' ? 'Home Banner' : pos === 'sidebar' ? 'Sidebar' : 'Article Bottom'}
+                      {pos === 'home_banner' ? 'Home Banner' : pos === 'sidebar' ? 'Sidebar' : pos === 'article_top' ? 'Article Top' : pos === 'article_mid' ? 'Article Mid' : 'Article Bottom'}
                     </label>
                   ))}
                 </div>
               </div>
+
               <div>
-                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold', fontSize: '0.9rem' }}>Target URL</label>
-                <input type="url" value={formData.target_url} onChange={e => setFormData({...formData, target_url: e.target.value})} style={{ width: '100%', padding: '0.5rem', border: '1px solid var(--border-color)', borderRadius: '4px' }} placeholder="https://example.com" />
+                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold', fontSize: '0.9rem' }}>Publish Mode</label>
+                <div style={{ display: 'flex', borderRadius: '6px', overflow: 'hidden', border: '1px solid var(--border-color)' }}>
+                  <button 
+                    type="button" 
+                    onClick={() => { setPublishMode('immediate'); setFormData({...formData, starts_at: ''}); }}
+                    style={{ flex: 1, padding: '0.6rem', border: 'none', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.85rem', backgroundColor: publishMode === 'immediate' ? 'var(--primary-color)' : '#f9fafb', color: publishMode === 'immediate' ? 'white' : '#374151', transition: 'all 0.2s' }}
+                  >
+                    🚀 Immediate
+                  </button>
+                  <button 
+                    type="button" 
+                    onClick={() => setPublishMode('scheduled')}
+                    style={{ flex: 1, padding: '0.6rem', border: 'none', borderLeft: '1px solid var(--border-color)', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.85rem', backgroundColor: publishMode === 'scheduled' ? 'var(--primary-color)' : '#f9fafb', color: publishMode === 'scheduled' ? 'white' : '#374151', transition: 'all 0.2s' }}
+                  >
+                    📅 Scheduled
+                  </button>
+                </div>
+                <span style={{ fontSize: '0.8rem', color: 'var(--text-light)', marginTop: '0.25rem', display: 'block' }}>
+                  {publishMode === 'immediate' ? 'Ad will go live as soon as you save' : 'Ad will go live at the scheduled date & time'}
+                </span>
               </div>
+
+              {publishMode === 'scheduled' && (
+                <div>
+                  <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold', fontSize: '0.9rem' }}>Start Date & Time</label>
+                  <input 
+                    type="datetime-local" 
+                    value={formData.starts_at || ''} 
+                    onChange={e => setFormData({...formData, starts_at: e.target.value})} 
+                    style={{ width: '100%', padding: '0.5rem', border: '1px solid var(--border-color)', borderRadius: '4px' }} 
+                  />
+                  <span style={{ fontSize: '0.8rem', color: 'var(--text-light)', marginTop: '0.25rem', display: 'block' }}>Ad will start showing from this exact date and time</span>
+                </div>
+              )}
+
               <div>
-                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold', fontSize: '0.9rem' }}>Expiration Date & Time</label>
+                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold', fontSize: '0.9rem' }}>End Date</label>
                 <input 
-                  type="datetime-local" 
+                  type="date" 
                   value={formData.expires_at || ''} 
                   onChange={e => setFormData({...formData, expires_at: e.target.value})} 
                   style={{ width: '100%', padding: '0.5rem', border: '1px solid var(--border-color)', borderRadius: '4px' }} 
                 />
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', marginTop: '0.25rem' }}>
-                  <span style={{ fontSize: '0.8rem', color: 'var(--text-light)' }}>Leave empty for no expiration. To extend duration, simply pick a new date!</span>
-                </div>
+                <span style={{ fontSize: '0.8rem', color: 'var(--text-light)', marginTop: '0.25rem', display: 'block' }}>Ad will stop showing at 11:59 PM on this date. Leave empty for no expiration.</span>
               </div>
               <div>
-                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold', fontSize: '0.9rem' }}>Banner Image URL</label>
-                <div style={{ display: 'flex', gap: '0.5rem' }}>
-                  <input required type="text" value={formData.image_url} onChange={e => setFormData({...formData, image_url: e.target.value})} style={{ flex: 1, padding: '0.5rem', border: '1px solid var(--border-color)', borderRadius: '4px' }} />
-                  <button type="button" onClick={() => setIsMediaPickerOpen(true)} style={{ padding: '0.5rem 1rem', border: '1px solid var(--border-color)', borderRadius: '4px', cursor: 'pointer', backgroundColor: '#f3f4f6' }}>Select</button>
-                </div>
+                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold', fontSize: '0.9rem' }}>Banner Image</label>
+                {formData.image_url && (
+                  <div style={{ marginBottom: '0.5rem', position: 'relative', borderRadius: '6px', overflow: 'hidden', border: '1px solid var(--border-color)' }}>
+                    <img src={formData.image_url} alt="Banner preview" style={{ width: '100%', display: 'block', maxHeight: '150px', objectFit: 'cover' }} />
+                    <button type="button" onClick={() => setFormData({...formData, image_url: ''})} style={{ position: 'absolute', top: '0.25rem', right: '0.25rem', background: 'rgba(0,0,0,0.6)', color: 'white', border: 'none', borderRadius: '50%', width: '24px', height: '24px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '0.75rem' }}>✕</button>
+                  </div>
+                )}
+                <button type="button" onClick={() => setIsMediaPickerOpen(true)} style={{ width: '100%', padding: '0.5rem 1rem', border: '1px solid var(--border-color)', borderRadius: '4px', cursor: 'pointer', backgroundColor: '#f3f4f6', fontWeight: 'bold' }}>🖼️ {formData.image_url ? 'Change Image' : 'Select Image from Media Library'}</button>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.5rem' }}>
                 <input type="checkbox" checked={formData.active} onChange={e => setFormData({...formData, active: e.target.checked})} id="active-checkbox" />

@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
       params.push(position);
     }
     if (activeOnly) {
-      conditions.push('active = 1 AND (expires_at IS NULL OR expires_at > NOW())');
+      conditions.push('active = 1 AND (expires_at IS NULL OR expires_at > NOW()) AND (starts_at IS NULL OR starts_at <= NOW())');
     }
 
     if (conditions.length > 0) {
@@ -48,11 +48,12 @@ export async function POST(request: NextRequest) {
     const targetUrlSafe = target_url || '';
     
     // Convert empty string to null for database
+    const startsAt = data.starts_at ? new Date(data.starts_at) : null;
     const expiresAt = data.expires_at ? new Date(data.expires_at) : null;
 
     const [result] = await pool.query<ResultSetHeader>(
-      'INSERT INTO advertisements (title, position, image_url, target_url, active, expires_at) VALUES (?, ?, ?, ?, ?, ?)',
-      [title, position, image_url, targetUrlSafe, isActive, expiresAt]
+      'INSERT INTO advertisements (title, position, image_url, target_url, active, starts_at, expires_at) VALUES (?, ?, ?, ?, ?, ?, ?)',
+      [title, position, image_url, targetUrlSafe, isActive, startsAt, expiresAt]
     );
 
     return NextResponse.json({ success: true, id: result.insertId });
