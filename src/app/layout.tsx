@@ -35,7 +35,7 @@ export const metadata: Metadata = {
   },
 }
 
-const adsenseClientId = process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID || 'ca-pub-XXXXXXXXXXXXXXXX'
+const adsenseClientId = process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID || 'ca-pub-3454649560719666'
 
 export default function RootLayout({
   children,
