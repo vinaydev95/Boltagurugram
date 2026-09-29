@@ -4,6 +4,7 @@ import Footer from '@/components/Footer';
 import Link from 'next/link';
 import { getArticleBySlugDB, getRelatedArticlesDB, getLatestArticlesDB, incrementArticleViewsDB } from '@/lib/db-queries';
 import AdBanner from '@/components/AdBanner';
+import GoogleAdSense from '@/components/GoogleAdSense';
 import ArticleContentWithAd from '@/components/ArticleContentWithAd';
 import pool from '@/lib/db';
 import { RowDataPacket } from 'mysql2';
@@ -226,6 +227,9 @@ export default async function ArticlePage({ params }: { params: { slug: string }
             {/* Article Body with Mid Ad */}
             <ArticleContentWithAd content={article.content || ''} midAds={midAds} />
 
+            {/* Google AdSense - In-article Ad */}
+            <GoogleAdSense adSlot="YOUR_AD_SLOT_3" adLayout="in-article" adFormat="fluid" />
+
             {/* Article Tags */}
             {tags.length > 0 && (
               <div style={{ display: 'flex', gap: '0.5rem', marginTop: '3rem', paddingTop: '1.5rem', borderTop: '1px solid var(--border-color)', flexWrap: 'wrap', alignItems: 'center' }}>
@@ -268,6 +272,11 @@ export default async function ArticlePage({ params }: { params: { slug: string }
               <p style={{ fontSize: '0.85rem', color: '#9ca3af', marginBottom: '1rem' }}>Get breaking news delivered straight to your inbox.</p>
               <input type="email" placeholder="Email address" style={{ width: '100%', padding: '0.75rem', borderRadius: '4px', border: 'none', marginBottom: '0.5rem', outline: 'none', boxSizing: 'border-box' }} />
               <button style={{ width: '100%', backgroundColor: 'var(--primary-color)', color: 'white', border: 'none', padding: '0.75rem', borderRadius: '4px', fontWeight: 'bold', cursor: 'pointer' }}>Subscribe</button>
+            </div>
+
+            {/* Google AdSense - Sidebar Ad */}
+            <div style={{ backgroundColor: 'white', borderRadius: '8px', padding: '1rem', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
+              <GoogleAdSense adSlot="YOUR_AD_SLOT_4" adFormat="vertical" />
             </div>
           </aside>
         </div>
