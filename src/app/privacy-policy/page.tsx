@@ -161,8 +161,9 @@ export default function PrivacyPolicyPage() {
                 🔹 6. Google AdSense, AdMob & Third-Party Advertisers
               </h3>
               <p style={{ marginBottom: '0.5rem' }}>हमारी वेबसाइट और ऐप निम्न third-party technologies उपयोग कर सकते हैं:</p>
-              <p style={{ fontStyle: 'italic', margin: '0 0 0.5rem 0' }}>Google AdSense, Google AdMob, Google DoubleClick, Google Marketing Platform, Facebook Audience Network (यदि भविष्य में लागू हो)</p>
-              <p style={{ margin: '0 0 0.5rem 0' }}>ये विज्ञापनदाता Cookies, JavaScript, या Web Beacons का उपयोग कर सकते हैं।</p>
+              <p style={{ fontStyle: 'italic', margin: '0 0 0.5rem 0' }}>Google AdSense, Google AdMob, Google DoubleClick, Google Marketing Platform</p>
+              <p style={{ margin: '0 0 0.5rem 0' }}>Google third-party vendor के रूप में हमारी साइट पर विज्ञापन दिखाने के लिए cookies (जैसे DART cookie) का उपयोग करता है।</p>
+              <p style={{ margin: '0 0 0.5rem 0' }}>उपयोगकर्ता Google के विज्ञापन और सामग्री नेटवर्क गोपनीयता नीति पर जाकर DART cookie के उपयोग से बाहर निकल (opt-out) सकते हैं: <a href="https://adssettings.google.com" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--primary-color)' }}>https://adssettings.google.com</a> या <a href="https://www.aboutads.info" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--primary-color)' }}>www.aboutads.info</a>।</p>
               <p style={{ fontWeight: 'bold', margin: 0 }}>हमारे पास third-party cookies पर कोई नियंत्रण नहीं है।</p>
             </div>
 

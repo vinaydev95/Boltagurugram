@@ -1,0 +1,13 @@
+User-agent: Mediapartners-Google
+Allow: /
+
+User-agent: Googlebot
+Allow: /
+
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /dashboard/
+Disallow: /signin/
+
+Sitemap: https://boltagurugram.com/sitemap.xml

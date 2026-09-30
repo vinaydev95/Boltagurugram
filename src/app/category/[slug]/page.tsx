@@ -5,7 +5,7 @@ import Link from 'next/link';
 import AdBanner from '@/components/AdBanner';
 import { getArticlesByCategoryDB, getCategoryBySlugDB, getTrendingArticlesDB } from '@/lib/db-queries';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 60;
 
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
   const decodedSlug = decodeURIComponent(params.slug);
@@ -25,10 +25,12 @@ export async function generateMetadata({ params }: { params: { slug: string } })
 
 export default async function CategoryPage({ params }: { params: { slug: string } }) {
   const decodedSlug = decodeURIComponent(params.slug);
-  const cat = await getCategoryBySlugDB(decodedSlug);
+  const [cat, categoryArticles, trending] = await Promise.all([
+    getCategoryBySlugDB(decodedSlug),
+    getArticlesByCategoryDB(decodedSlug, 20),
+    getTrendingArticlesDB(4),
+  ]);
   const categoryName = cat?.name || decodedSlug.charAt(0).toUpperCase() + decodedSlug.slice(1);
-  const categoryArticles = await getArticlesByCategoryDB(decodedSlug, 20);
-  const trending = await getTrendingArticlesDB(4);
   const featuredArticle = categoryArticles[0];
   const listArticles = categoryArticles.slice(1);
 

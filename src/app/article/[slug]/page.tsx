@@ -9,7 +9,7 @@ import ArticleContentWithAd from '@/components/ArticleContentWithAd';
 import pool from '@/lib/db';
 import { RowDataPacket } from 'mysql2';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 60;
 
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
   const decodedSlug = decodeURIComponent(params.slug);
@@ -71,24 +71,21 @@ export default async function ArticlePage({ params }: { params: { slug: string }
     );
   }
 
-  // Increment views only here in the page component
-  await incrementArticleViewsDB(decodedSlug);
+  // Increment views non-blockingly so SSR response is instant
+  incrementArticleViewsDB(decodedSlug).catch(console.error);
 
-  const related = await getRelatedArticlesDB(article.slug, article.category_id, 4);
-  const moreArticles = (await getLatestArticlesDB(5)).filter((a: any) => a.slug !== article.slug).slice(0, 4);
+  const [related, latestArticles, adsResult] = await Promise.all([
+    getRelatedArticlesDB(article.slug, article.category_id, 4),
+    getLatestArticlesDB(5),
+    pool.query<RowDataPacket[]>(
+      'SELECT * FROM advertisements WHERE active = 1 AND (expires_at IS NULL OR expires_at > NOW()) AND (starts_at IS NULL OR starts_at <= NOW()) ORDER BY id DESC'
+    ).catch(() => [[] as RowDataPacket[]]),
+  ]);
+
+  const moreArticles = (latestArticles || []).filter((a: any) => a.slug !== article.slug).slice(0, 4);
   const catSlug = article.category_slug || article.category_name?.toLowerCase();
   const tags = article.tagsArray || [];
-
-  // Fetch all active ads for the mid-article client component
-  let midAds: any[] = [];
-  try {
-    const [rows] = await pool.query<RowDataPacket[]>(
-      'SELECT * FROM advertisements WHERE active = 1 AND (expires_at IS NULL OR expires_at > NOW()) AND (starts_at IS NULL OR starts_at <= NOW()) ORDER BY id DESC'
-    );
-    midAds = rows;
-  } catch (e) {
-    // Silent fail
-  }
+  const midAds = Array.isArray(adsResult) && Array.isArray(adsResult[0]) ? adsResult[0] : [];
 
   return (
     <div style={{ backgroundColor: 'var(--bg-color)', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>

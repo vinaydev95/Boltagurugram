@@ -6,15 +6,17 @@ import AdBanner from '@/components/AdBanner';
 import GoogleAdSense from '@/components/GoogleAdSense';
 import { getLatestArticlesDB, getTrendingArticlesDB, getArticlesByCategoryDB } from '@/lib/db-queries';
 
-// Force dynamic rendering so data is always fresh
-export const dynamic = 'force-dynamic';
+// Use ISR with 60-second revalidation for ultra-fast response times and zero crawler timeouts
+export const revalidate = 60;
 
 export default async function Home() {
-  const latest = await getLatestArticlesDB(14);
-  const trending = await getTrendingArticlesDB(5);
-  const sportsArticles = await getArticlesByCategoryDB('sports', 4);
-  const crimeArticles = await getArticlesByCategoryDB('crime', 4);
-  const politicalArticles = await getArticlesByCategoryDB('political', 4);
+  const [latest, trending, sportsArticles, crimeArticles, politicalArticles] = await Promise.all([
+    getLatestArticlesDB(14),
+    getTrendingArticlesDB(5),
+    getArticlesByCategoryDB('sports', 4),
+    getArticlesByCategoryDB('crime', 4),
+    getArticlesByCategoryDB('political', 4),
+  ]);
 
   const heroArticle = latest[0];
   const secondaryArticles = latest.slice(1, 3);

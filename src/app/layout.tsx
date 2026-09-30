@@ -1,6 +1,5 @@
 import './globals.css'
 import type { Metadata } from 'next'
-import Script from 'next/script'
 import { AuthProvider } from '@/lib/AuthContext'
 
 export const metadata: Metadata = {
@@ -46,11 +45,10 @@ export default function RootLayout({
     <html lang="en">
       <head>
         {/* Google AdSense Script */}
-        <Script
+        <script
           async
           src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adsenseClientId}`}
           crossOrigin="anonymous"
-          strategy="afterInteractive"
         />
       </head>
       <body>

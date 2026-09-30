@@ -68,119 +68,180 @@ function normalizeArticle(row: any) {
 // ------- ARTICLE QUERIES -------
 
 export async function getLatestArticlesDB(count: number = 14) {
-  const [rows] = await pool.query<RowDataPacket[]>(
-    `SELECT a.*, c.name as category_name, c.slug as category_slug, c.color as category_color
-     FROM articles a
-     LEFT JOIN categories c ON a.category_id = c.id
-     WHERE a.status = 'Published'
-     ORDER BY a.created_at DESC
-     LIMIT ?`,
-    [count]
-  );
-  return rows.map(normalizeArticle);
+  try {
+    const [rows] = await pool.query<RowDataPacket[]>(
+      `SELECT a.*, c.name as category_name, c.slug as category_slug, c.color as category_color
+       FROM articles a
+       LEFT JOIN categories c ON a.category_id = c.id
+       WHERE a.status = 'Published'
+       ORDER BY a.created_at DESC
+       LIMIT ?`,
+      [count]
+    );
+    return rows.map(normalizeArticle);
+  } catch (error) {
+    console.error('getLatestArticlesDB error:', error);
+    return [];
+  }
 }
 
 export async function getTrendingArticlesDB(count: number = 5) {
-  const [rows] = await pool.query<RowDataPacket[]>(
-    `SELECT a.*, c.name as category_name, c.slug as category_slug, c.color as category_color
-     FROM articles a
-     LEFT JOIN categories c ON a.category_id = c.id
-     WHERE a.status = 'Published'
-     ORDER BY a.views DESC
-     LIMIT ?`,
-    [count]
-  );
-  return rows.map(normalizeArticle);
+  try {
+    const [rows] = await pool.query<RowDataPacket[]>(
+      `SELECT a.*, c.name as category_name, c.slug as category_slug, c.color as category_color
+       FROM articles a
+       LEFT JOIN categories c ON a.category_id = c.id
+       WHERE a.status = 'Published'
+       ORDER BY a.views DESC
+       LIMIT ?`,
+      [count]
+    );
+    return rows.map(normalizeArticle);
+  } catch (error) {
+    console.error('getTrendingArticlesDB error:', error);
+    return [];
+  }
 }
 
 export async function getArticlesByCategoryDB(categorySlug: string, count: number = 10) {
-  const [rows] = await pool.query<RowDataPacket[]>(
-    `SELECT a.*, c_primary.name as category_name, c_primary.slug as category_slug, c_primary.color as category_color
-     FROM articles a
-     JOIN article_categories ac ON a.id = ac.article_id
-     JOIN categories c_search ON ac.category_id = c_search.id
-     LEFT JOIN categories c_primary ON a.category_id = c_primary.id
-     WHERE c_search.slug = ? AND a.status = 'Published'
-     ORDER BY a.created_at DESC
-     LIMIT ?`,
-    [categorySlug, count]
-  );
-  return rows.map(normalizeArticle);
+  try {
+    const [rows] = await pool.query<RowDataPacket[]>(
+      `SELECT a.*, c_primary.name as category_name, c_primary.slug as category_slug, c_primary.color as category_color
+       FROM articles a
+       JOIN article_categories ac ON a.id = ac.article_id
+       JOIN categories c_search ON ac.category_id = c_search.id
+       LEFT JOIN categories c_primary ON a.category_id = c_primary.id
+       WHERE c_search.slug = ? AND a.status = 'Published'
+       ORDER BY a.created_at DESC
+       LIMIT ?`,
+      [categorySlug, count]
+    );
+    return rows.map(normalizeArticle);
+  } catch (error) {
+    console.error('getArticlesByCategoryDB error:', error);
+    return [];
+  }
 }
 
 export async function incrementArticleViewsDB(slug: string) {
-  await pool.query('UPDATE articles SET views = views + 1 WHERE slug = ?', [slug]);
+  try {
+    await pool.query('UPDATE articles SET views = views + 1 WHERE slug = ?', [slug]);
+  } catch (error) {
+    console.error('incrementArticleViewsDB error:', error);
+  }
 }
 
 export async function getArticleBySlugDB(slug: string) {
-  const [rows] = await pool.query<RowDataPacket[]>(
-    `SELECT a.*, c.name as category_name, c.slug as category_slug, c.color as category_color
-     FROM articles a
-     LEFT JOIN categories c ON a.category_id = c.id
-     WHERE a.slug = ?`,
-    [slug]
-  );
+  try {
+    const [rows] = await pool.query<RowDataPacket[]>(
+      `SELECT a.*, c.name as category_name, c.slug as category_slug, c.color as category_color
+       FROM articles a
+       LEFT JOIN categories c ON a.category_id = c.id
+       WHERE a.slug = ?`,
+      [slug]
+    );
 
-  if (rows.length === 0) return null;
-  return normalizeArticle(rows[0]);
+    if (rows.length === 0) return null;
+    return normalizeArticle(rows[0]);
+  } catch (error) {
+    console.error('getArticleBySlugDB error:', error);
+    return null;
+  }
 }
 
 export async function getRelatedArticlesDB(slug: string, categoryId: number, count: number = 4) {
-  const [rows] = await pool.query<RowDataPacket[]>(
-    `SELECT a.*, c.name as category_name, c.slug as category_slug, c.color as category_color
-     FROM articles a
-     LEFT JOIN categories c ON a.category_id = c.id
-     WHERE a.category_id = ? AND a.slug != ? AND a.status = 'Published'
-     ORDER BY a.created_at DESC
-     LIMIT ?`,
-    [categoryId, slug, count]
-  );
-  return rows.map(normalizeArticle);
+  try {
+    const [rows] = await pool.query<RowDataPacket[]>(
+      `SELECT a.*, c.name as category_name, c.slug as category_slug, c.color as category_color
+       FROM articles a
+       LEFT JOIN categories c ON a.category_id = c.id
+       WHERE a.category_id = ? AND a.slug != ? AND a.status = 'Published'
+       ORDER BY a.created_at DESC
+       LIMIT ?`,
+      [categoryId, slug, count]
+    );
+    return rows.map(normalizeArticle);
+  } catch (error) {
+    console.error('getRelatedArticlesDB error:', error);
+    return [];
+  }
 }
 
 export async function getFeaturedArticlesDB() {
-  const [rows] = await pool.query<RowDataPacket[]>(
-    `SELECT a.*, c.name as category_name, c.slug as category_slug, c.color as category_color
-     FROM articles a
-     LEFT JOIN categories c ON a.category_id = c.id
-     WHERE a.featured = TRUE AND a.status = 'Published'
-     ORDER BY a.created_at DESC`
-  );
-  return rows.map(normalizeArticle);
+  try {
+    const [rows] = await pool.query<RowDataPacket[]>(
+      `SELECT a.*, c.name as category_name, c.slug as category_slug, c.color as category_color
+       FROM articles a
+       LEFT JOIN categories c ON a.category_id = c.id
+       WHERE a.featured = TRUE AND a.status = 'Published'
+       ORDER BY a.created_at DESC`
+    );
+    return rows.map(normalizeArticle);
+  } catch (error) {
+    console.error('getFeaturedArticlesDB error:', error);
+    return [];
+  }
 }
 
 export async function getArticlesBySearchDB(query: string, count: number = 20) {
-  const searchTerm = `%${query}%`;
-  const [rows] = await pool.query<RowDataPacket[]>(
-    `SELECT a.*, c.name as category_name, c.slug as category_slug, c.color as category_color
-     FROM articles a
-     LEFT JOIN categories c ON a.category_id = c.id
-     WHERE a.status = 'Published' AND (a.title LIKE ? OR a.excerpt LIKE ? OR a.tags LIKE ?)
-     ORDER BY a.created_at DESC
-     LIMIT ?`,
-    [searchTerm, searchTerm, searchTerm, count]
-  );
-  return rows.map(normalizeArticle);
+  try {
+    const searchTerm = `%${query}%`;
+    const [rows] = await pool.query<RowDataPacket[]>(
+      `SELECT a.*, c.name as category_name, c.slug as category_slug, c.color as category_color
+       FROM articles a
+       LEFT JOIN categories c ON a.category_id = c.id
+       WHERE a.status = 'Published' AND (a.title LIKE ? OR a.excerpt LIKE ? OR a.tags LIKE ?)
+       ORDER BY a.created_at DESC
+       LIMIT ?`,
+      [searchTerm, searchTerm, searchTerm, count]
+    );
+    return rows.map(normalizeArticle);
+  } catch (error) {
+    console.error('getArticlesBySearchDB error:', error);
+    return [];
+  }
 }
 
 // ------- CATEGORY QUERIES -------
 
 export async function getCategoriesDB() {
-  const [rows] = await pool.query<RowDataPacket[]>(
-    `SELECT c.*, COUNT(a.id) as article_count
-     FROM categories c
-     LEFT JOIN article_categories ac ON c.id = ac.category_id
-     LEFT JOIN articles a ON ac.article_id = a.id AND a.status = 'Published'
-     GROUP BY c.id
-     ORDER BY c.sort_order ASC, c.name ASC`
-  );
-  return rows;
+  try {
+    const [rows] = await pool.query<RowDataPacket[]>(
+      `SELECT c.*, COUNT(a.id) as article_count
+       FROM categories c
+       LEFT JOIN article_categories ac ON c.id = ac.category_id
+       LEFT JOIN articles a ON ac.article_id = a.id AND a.status = 'Published'
+       GROUP BY c.id
+       ORDER BY c.sort_order ASC, c.name ASC`
+    );
+    return rows;
+  } catch (error) {
+    console.error('getCategoriesDB error:', error);
+    return [];
+  }
 }
 
 export async function getCategoryBySlugDB(slug: string) {
-  const [rows] = await pool.query<RowDataPacket[]>(
-    'SELECT * FROM categories WHERE slug = ?',
-    [slug]
-  );
-  return rows.length > 0 ? rows[0] : null;
+  try {
+    const [rows] = await pool.query<RowDataPacket[]>(
+      'SELECT * FROM categories WHERE slug = ?',
+      [slug]
+    );
+    return rows.length > 0 ? rows[0] : null;
+  } catch (error) {
+    console.error('getCategoryBySlugDB error:', error);
+    return null;
+  }
+}
+
+export async function getAllArticleSlugsForSitemapDB() {
+  try {
+    const [rows] = await pool.query<RowDataPacket[]>(
+      'SELECT slug, updated_at, created_at FROM articles WHERE status = "Published" ORDER BY created_at DESC LIMIT 500'
+    );
+    return rows;
+  } catch (error) {
+    console.error('getAllArticleSlugsForSitemapDB error:', error);
+    return [];
+  }
 }
