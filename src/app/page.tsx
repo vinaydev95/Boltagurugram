@@ -3,7 +3,7 @@ import Footer from '@/components/Footer';
 import Link from 'next/link';
 import Image from 'next/image';
 import AdBanner from '@/components/AdBanner';
-import GoogleAdSense from '@/components/GoogleAdSense';
+
 import { getLatestArticlesDB, getTrendingArticlesDB, getArticlesByCategoryDB } from '@/lib/db-queries';
 
 // Use ISR with 60-second revalidation for ultra-fast response times and zero crawler timeouts
@@ -120,8 +120,7 @@ export default async function Home() {
           </div>
         </section>
 
-        {/* Google AdSense - Horizontal Banner between sections */}
-        <GoogleAdSense adSlot="YOUR_AD_SLOT_1" adFormat="horizontal" />
+
 
         {/* Category Sections */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '3rem' }}>
@@ -149,8 +148,7 @@ export default async function Home() {
             </div>
           </section>
 
-          {/* Google AdSense - In-feed Ad */}
-          <GoogleAdSense adSlot="YOUR_AD_SLOT_2" adFormat="auto" />
+
 
           {/* Crime Section */}
           <section>
