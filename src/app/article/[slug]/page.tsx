@@ -9,11 +9,17 @@ import ArticleContentWithAd from '@/components/ArticleContentWithAd';
 import pool from '@/lib/db';
 import { RowDataPacket } from 'mysql2';
 
-export const revalidate = 60;
+export const revalidate = 300;
 
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
   const decodedSlug = decodeURIComponent(params.slug);
-  const article = await getArticleBySlugDB(decodedSlug);
+
+  let article: any = null;
+  try {
+    article = await getArticleBySlugDB(decodedSlug);
+  } catch (error) {
+    console.error('generateMetadata DB error:', error);
+  }
   
   // Default values
   const defaultTitle = article?.title || decodedSlug.replace(/-/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase());
@@ -54,7 +60,13 @@ export async function generateMetadata({ params }: { params: { slug: string } })
 
 export default async function ArticlePage({ params }: { params: { slug: string } }) {
   const decodedSlug = decodeURIComponent(params.slug);
-  const article = await getArticleBySlugDB(decodedSlug);
+
+  let article: any = null;
+  try {
+    article = await getArticleBySlugDB(decodedSlug);
+  } catch (error) {
+    console.error('ArticlePage: failed to fetch article:', error);
+  }
 
   if (!article) {
     const title = decodedSlug.replace(/-/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase());
@@ -74,13 +86,21 @@ export default async function ArticlePage({ params }: { params: { slug: string }
   // Increment views non-blockingly so SSR response is instant
   incrementArticleViewsDB(decodedSlug).catch(console.error);
 
-  const [related, latestArticles, adsResult] = await Promise.all([
-    getRelatedArticlesDB(article.slug, article.category_id, 4),
-    getLatestArticlesDB(5),
-    pool.query<RowDataPacket[]>(
-      'SELECT * FROM advertisements WHERE active = 1 AND (expires_at IS NULL OR expires_at > NOW()) AND (starts_at IS NULL OR starts_at <= NOW()) ORDER BY id DESC'
-    ).catch(() => [[] as RowDataPacket[]]),
-  ]);
+  let related: any[] = [];
+  let latestArticles: any[] = [];
+  let adsResult: any = [[]];
+
+  try {
+    [related, latestArticles, adsResult] = await Promise.all([
+      getRelatedArticlesDB(article.slug, article.category_id, 4),
+      getLatestArticlesDB(5),
+      pool.query<RowDataPacket[]>(
+        'SELECT * FROM advertisements WHERE active = 1 AND (expires_at IS NULL OR expires_at > NOW()) AND (starts_at IS NULL OR starts_at <= NOW()) ORDER BY id DESC'
+      ).catch(() => [[] as RowDataPacket[]]),
+    ]);
+  } catch (error) {
+    console.error('ArticlePage: failed to fetch related data:', error);
+  }
 
   const moreArticles = (latestArticles || []).filter((a: any) => a.slug !== article.slug).slice(0, 4);
   const catSlug = article.category_slug || article.category_name?.toLowerCase();

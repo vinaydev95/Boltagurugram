@@ -16,7 +16,13 @@ export async function generateMetadata({ searchParams }: { searchParams: { q?: s
 
 export default async function SearchPage({ searchParams }: { searchParams: { q?: string } }) {
   const query = searchParams.q || '';
-  const articles = query ? await getArticlesBySearchDB(query, 20) : [];
+
+  let articles: any[] = [];
+  try {
+    articles = query ? await getArticlesBySearchDB(query, 20) : [];
+  } catch (error) {
+    console.error('SearchPage data fetch failed:', error);
+  }
 
   return (
     <div style={{ backgroundColor: 'var(--bg-color)', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
