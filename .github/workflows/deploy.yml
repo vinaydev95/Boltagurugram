@@ -25,4 +25,4 @@ jobs:
             git pull origin main
             npm install
             npm run build
-            pm2 restart bolta-gurugram
+            pm2 reload bolta-gurugram --update-env

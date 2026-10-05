@@ -6,17 +6,28 @@ import AdBanner from '@/components/AdBanner';
 
 import { getLatestArticlesDB, getTrendingArticlesDB, getArticlesByCategoryDB } from '@/lib/db-queries';
 
-// Use ISR with 60-second revalidation for ultra-fast response times and zero crawler timeouts
-export const revalidate = 60;
+// Use ISR with 5-minute revalidation for fast response times and reliable caching
+export const revalidate = 300;
 
 export default async function Home() {
-  const [latest, trending, sportsArticles, crimeArticles, politicalArticles] = await Promise.all([
-    getLatestArticlesDB(14),
-    getTrendingArticlesDB(5),
-    getArticlesByCategoryDB('sports', 4),
-    getArticlesByCategoryDB('crime', 4),
-    getArticlesByCategoryDB('political', 4),
-  ]);
+  let latest: any[] = [];
+  let trending: any[] = [];
+  let sportsArticles: any[] = [];
+  let crimeArticles: any[] = [];
+  let politicalArticles: any[] = [];
+
+  try {
+    [latest, trending, sportsArticles, crimeArticles, politicalArticles] = await Promise.all([
+      getLatestArticlesDB(14),
+      getTrendingArticlesDB(5),
+      getArticlesByCategoryDB('sports', 4),
+      getArticlesByCategoryDB('crime', 4),
+      getArticlesByCategoryDB('political', 4),
+    ]);
+  } catch (error) {
+    console.error('Homepage data fetch failed:', error);
+    // Page will render with empty arrays — shows "No Articles Yet" fallback
+  }
 
   const heroArticle = latest[0];
   const secondaryArticles = latest.slice(1, 3);
