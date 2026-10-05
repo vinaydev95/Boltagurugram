@@ -30,7 +30,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   const desc = article?.meta_description || defaultDesc;
   
   // Resolve article image or fallback to brand logo
-  const shareImage = article?.image_url || 'https://boltagurugram.com/logo.gif';
+  const shareImage = article?.image_url || 'https://boltagurugram.com/logo.png';
 
   return {
     title: title,

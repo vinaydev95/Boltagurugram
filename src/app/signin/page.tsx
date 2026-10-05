@@ -58,7 +58,7 @@ export default function SignInPage() {
 
         {/* Logo */}
         <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-          <img src="/logo.gif" alt="Bolta Gurugram Logo" style={{ height: '100px', objectFit: 'contain', marginBottom: '0.5rem', display: 'block', margin: '0 auto' }} />
+          <img src="/logo.png" alt="Bolta Gurugram Logo" style={{ height: '100px', objectFit: 'contain', marginBottom: '0.5rem', display: 'block', margin: '0 auto' }} />
           <p style={{
             color: '#6b7280',
             fontSize: '0.95rem',

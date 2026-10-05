@@ -17,7 +17,7 @@ export const metadata: Metadata = {
     siteName: 'Bolta Gurugram',
     images: [
       {
-        url: 'https://boltagurugram.com/logo.gif',
+        url: 'https://boltagurugram.com/logo.png',
         width: 800,
         height: 600,
         alt: 'Bolta Gurugram',
@@ -30,7 +30,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Bolta Gurugram | Latest News, Breaking News',
     description: 'Your reliable source for the latest news and updates from Gurugram.',
-    images: ['https://boltagurugram.com/logo.gif'],
+    images: ['https://boltagurugram.com/logo.png'],
   },
 }
 

@@ -6,25 +6,6 @@ export const revalidate = 3600;
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = 'https://boltagurugram.com';
 
-  const [articles, categories] = await Promise.all([
-    getAllArticleSlugsForSitemapDB(),
-    getCategoriesDB(),
-  ]);
-
-  const articleEntries: MetadataRoute.Sitemap = (articles || []).map((art: any) => ({
-    url: `${baseUrl}/article/${art.slug}`,
-    lastModified: art.updated_at ? new Date(art.updated_at) : new Date(art.created_at || Date.now()),
-    changeFrequency: 'daily' as const,
-    priority: 0.8,
-  }));
-
-  const categoryEntries: MetadataRoute.Sitemap = (categories || []).map((cat: any) => ({
-    url: `${baseUrl}/category/${cat.slug}`,
-    lastModified: new Date(),
-    changeFrequency: 'daily' as const,
-    priority: 0.8,
-  }));
-
   const staticEntries: MetadataRoute.Sitemap = [
     {
       url: baseUrl,
@@ -51,6 +32,33 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.5,
     },
   ];
+
+  // If DB is down, return at least the static entries so Google still gets a valid sitemap
+  let articleEntries: MetadataRoute.Sitemap = [];
+  let categoryEntries: MetadataRoute.Sitemap = [];
+
+  try {
+    const [articles, categories] = await Promise.all([
+      getAllArticleSlugsForSitemapDB(),
+      getCategoriesDB(),
+    ]);
+
+    articleEntries = (articles || []).map((art: any) => ({
+      url: `${baseUrl}/article/${art.slug}`,
+      lastModified: art.updated_at ? new Date(art.updated_at) : new Date(art.created_at || Date.now()),
+      changeFrequency: 'daily' as const,
+      priority: 0.8,
+    }));
+
+    categoryEntries = (categories || []).map((cat: any) => ({
+      url: `${baseUrl}/category/${cat.slug}`,
+      lastModified: new Date(),
+      changeFrequency: 'daily' as const,
+      priority: 0.8,
+    }));
+  } catch (error) {
+    console.error('Sitemap DB fetch failed, returning static entries only:', error);
+  }
 
   return [...staticEntries, ...categoryEntries, ...articleEntries];
 }

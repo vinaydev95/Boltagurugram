@@ -23,8 +23,8 @@ const pool =
     keepAliveInitialDelay: 0,
   });
 
-// In development, cache on the global object to survive hot reloads
-if (process.env.NODE_ENV !== 'production') {
+// Cache on the global object to survive hot reloads and prevent multiple pool instances
+if (!global._mysqlPool) {
   global._mysqlPool = pool;
 }
 
