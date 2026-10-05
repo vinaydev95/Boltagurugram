@@ -55,7 +55,7 @@ export default function Footer() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
           <Link href="/" style={{ display: 'inline-block' }}>
             <img 
-              src="/logo.png" 
+              src="/logo.gif" 
               alt="Bolta Gurugram Logo" 
               style={{ height: '80px', objectFit: 'contain', display: 'block' }} 
             />

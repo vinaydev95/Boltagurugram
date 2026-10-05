@@ -104,7 +104,7 @@ export default function Header() {
       {/* Main Header */}
       <div className="header-main">
         <Link href="/" style={{ display: 'flex', alignItems: 'center' }}>
-          <img src="/logo.png" alt="Bolta Gurugram Logo" style={{ height: '100px', objectFit: 'contain' }} />
+          <img src="/logo.gif" alt="Bolta Gurugram Logo" style={{ height: '100px', objectFit: 'contain' }} />
         </Link>
 
         {/* Desktop actions */}
@@ -187,7 +187,7 @@ export default function Header() {
       {/* Mobile Menu Overlay */}
       <div className={`mobile-menu ${mobileMenuOpen ? 'open' : ''}`}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-          <img src="/logo.png" alt="Bolta Gurugram Logo" style={{ height: '35px', objectFit: 'contain' }} />
+          <img src="/logo.gif" alt="Bolta Gurugram Logo" style={{ height: '35px', objectFit: 'contain' }} />
           <button onClick={() => setMobileMenuOpen(false)} style={{ background: 'none', border: 'none', fontSize: '1.75rem', cursor: 'pointer', color: 'var(--text-dark)' }}>✕</button>
         </div>
 
