@@ -3,6 +3,21 @@ import type { Metadata } from 'next'
 import { AuthProvider } from '@/lib/AuthContext'
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://boltagurugram.com'),
+  alternates: {
+    canonical: 'https://boltagurugram.com',
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
   title: 'Bolta Gurugram | Latest News, Breaking News',
   description: 'Your reliable source for the latest news and updates from Gurugram.',
   icons: {

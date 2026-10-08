@@ -1,20 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  async redirects() {
-    return [
-      {
-        source: '/:path*',
-        has: [
-          {
-            type: 'host',
-            value: 'www.boltagurugram.com',
-          },
-        ],
-        destination: 'https://boltagurugram.com/:path*',
-        permanent: true,
-      },
-    ];
-  },
+  // Redirects from www to non-www are handled via middleware with standard 301 status code
 };
 
 export default nextConfig;
