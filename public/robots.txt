@@ -4,8 +4,13 @@ Allow: /
 User-agent: Googlebot
 Allow: /
 
+User-agent: AdsBot-Google
+Allow: /
+
 User-agent: *
 Allow: /
+Allow: /api/articles
+Allow: /api/categories
 Disallow: /api/
 Disallow: /dashboard/
 Disallow: /signin/

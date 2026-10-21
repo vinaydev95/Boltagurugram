@@ -2,6 +2,8 @@ import './globals.css'
 import type { Metadata } from 'next'
 import { AuthProvider } from '@/lib/AuthContext'
 
+import Script from 'next/script';
+
 export const metadata: Metadata = {
   metadataBase: new URL('https://boltagurugram.com'),
   alternates: {
@@ -17,6 +19,9 @@ export const metadata: Metadata = {
       'max-image-preview': 'large',
       'max-snippet': -1,
     },
+  },
+  other: {
+    'google-adsense-account': 'ca-pub-3454649560719666',
   },
   title: 'Bolta Gurugram | Latest News, Breaking News',
   description: 'Your reliable source for the latest news and updates from Gurugram.',
@@ -58,15 +63,13 @@ export default function RootLayout({
 }) {
   return (
     <html lang="hi">
-      <head>
+      <body>
         {/* Google AdSense Script */}
-        <script
-          async
+        <Script
           src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adsenseClientId}`}
           crossOrigin="anonymous"
+          strategy="afterInteractive"
         />
-      </head>
-      <body>
         <AuthProvider>
           {children}
         </AuthProvider>
