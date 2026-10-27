@@ -2,8 +2,6 @@ import './globals.css'
 import type { Metadata } from 'next'
 import { AuthProvider } from '@/lib/AuthContext'
 
-import Script from 'next/script';
-
 export const metadata: Metadata = {
   metadataBase: new URL('https://boltagurugram.com'),
   alternates: {
@@ -63,13 +61,15 @@ export default function RootLayout({
 }) {
   return (
     <html lang="hi">
-      <body>
-        {/* Google AdSense Script */}
-        <Script
+      <head>
+        {/* Google AdSense Script - Placed in head for raw HTML scrapers */}
+        <script
+          async
           src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adsenseClientId}`}
           crossOrigin="anonymous"
-          strategy="afterInteractive"
         />
+      </head>
+      <body>
         <AuthProvider>
           {children}
         </AuthProvider>

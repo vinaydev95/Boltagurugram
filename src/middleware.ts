@@ -2,6 +2,13 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 export function middleware(request: NextRequest) {
+  const userAgent = request.headers.get('user-agent') || '';
+
+  // Never redirect Google crawlers inside Next.js middleware
+  if (/Mediapartners-Google|Googlebot|AdsBot-Google/i.test(userAgent)) {
+    return NextResponse.next();
+  }
+
   const host = request.headers.get('host') || '';
 
   // Clean 301 redirect for www -> non-www (avoids 308 code which AdSense crawler drops)
