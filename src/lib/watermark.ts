@@ -4,8 +4,8 @@ import fs from 'fs';
 
 export interface WatermarkOptions {
   position?: 'bottom-right' | 'bottom-left' | 'top-right' | 'top-left' | 'center';
-  opacity?: number; // 0.1 to 1.0 (default 0.92)
-  scaleRatio?: number; // ratio of image width, default 0.18 (18%)
+  opacity?: number; // 0.1 to 1.0 (default 0.95)
+  scaleRatio?: number; // ratio of image width, default 0.22 (22%)
   paddingRatio?: number; // ratio of minimum dimension, default 0.025 (2.5%)
   logoPath?: string;
 }
@@ -20,8 +20,8 @@ export async function applyWatermark(
 ): Promise<{ buffer: Buffer; format: string; width: number; height: number; mimeType: string }> {
   const {
     position = 'bottom-right',
-    opacity = 0.92,
-    scaleRatio = 0.18,
+    opacity = 0.95,
+    scaleRatio = 0.22,
     paddingRatio = 0.025,
     logoPath = path.join(process.cwd(), 'public', 'logo.png'),
   } = options;
@@ -43,12 +43,20 @@ export async function applyWatermark(
 
   // Load and trim logo to remove excess transparent padding
   const trimmedLogoBuffer = await sharp(logoPath).trim().toBuffer();
+  const trimmedMeta = await sharp(trimmedLogoBuffer).metadata();
+  const logoAspect = (trimmedMeta.width || 1224) / (trimmedMeta.height || 761);
 
   // Determine watermark width (proportional to image width)
   let wmWidth = Math.round(imgWidth * scaleRatio);
-  wmWidth = Math.max(60, Math.min(280, wmWidth));
-  if (wmWidth > imgWidth * 0.45) {
-    wmWidth = Math.round(imgWidth * 0.45);
+  wmWidth = Math.max(70, Math.min(380, wmWidth));
+  if (wmWidth > imgWidth * 0.40) {
+    wmWidth = Math.round(imgWidth * 0.40);
+  }
+
+  // Ensure height does not exceed 35% of image height
+  const estimatedHeight = Math.round(wmWidth / logoAspect);
+  if (estimatedHeight > imgHeight * 0.35) {
+    wmWidth = Math.round(imgHeight * 0.35 * logoAspect);
   }
 
   // Resize logo keeping aspect ratio
@@ -74,7 +82,7 @@ export async function applyWatermark(
   const processedLogoBuffer = await logoSharp.toBuffer();
   const logoMeta = await sharp(processedLogoBuffer).metadata();
   const actualLogoWidth = logoMeta.width || wmWidth;
-  const actualLogoHeight = logoMeta.height || Math.round(wmWidth * 0.69);
+  const actualLogoHeight = logoMeta.height || Math.round(wmWidth / logoAspect);
 
   // Calculate padding based on smaller image dimension
   const padding = Math.max(10, Math.round(Math.min(imgWidth, imgHeight) * paddingRatio));
