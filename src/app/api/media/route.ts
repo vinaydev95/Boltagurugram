@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import pool from '@/lib/db';
 import { RowDataPacket, ResultSetHeader } from 'mysql2';
+import { applyWatermark, WatermarkOptions } from '@/lib/watermark';
 
 // GET /api/media — Fetch all media files
 export async function GET() {
@@ -28,7 +29,25 @@ export async function POST(request: NextRequest) {
 
     // Read file as buffer
     const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
+    let buffer: Buffer = Buffer.from(bytes) as unknown as Buffer;
+    let contentType = file.type;
+
+    // Check if watermark is requested (default: true for raster images)
+    const watermarkParam = formData.get('watermark');
+    const shouldWatermark = watermarkParam === null || watermarkParam === undefined || watermarkParam === 'true' || watermarkParam === '1';
+    const watermarkPosition = (formData.get('watermarkPosition') as WatermarkOptions['position']) || 'bottom-right';
+
+    const isRasterImage = file.type.startsWith('image/') && !file.type.includes('svg') && !file.type.includes('gif');
+
+    if (shouldWatermark && isRasterImage) {
+      try {
+        const watermarked = await applyWatermark(buffer, { position: watermarkPosition });
+        buffer = watermarked.buffer;
+        contentType = watermarked.mimeType;
+      } catch (wmErr) {
+        console.warn('Failed to apply watermark, proceeding with original file:', wmErr);
+      }
+    }
 
     // Generate unique filename
     const timestamp = Date.now();
@@ -61,7 +80,7 @@ export async function POST(request: NextRequest) {
       Bucket: bucket,
       Key: s3Key,
       Body: buffer,
-      ContentType: file.type,
+      ContentType: contentType,
       ACL: 'public-read',
     }));
 

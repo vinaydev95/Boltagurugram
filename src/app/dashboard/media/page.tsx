@@ -16,6 +16,8 @@ export default function MediaPage() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
+  const [applyWatermark, setApplyWatermark] = useState(true);
+  const [watermarkingId, setWatermarkingId] = useState<number | null>(null);
 
   useEffect(() => {
     fetchMedia();
@@ -47,6 +49,7 @@ export default function MediaPage() {
       for (let i = 0; i < selectedFiles.length; i++) {
         const formData = new FormData();
         formData.append('file', selectedFiles[i]);
+        formData.append('watermark', applyWatermark ? 'true' : 'false');
         try {
           const res = await fetch('/api/media', { method: 'POST', body: formData });
           const data = await res.json();
@@ -62,6 +65,28 @@ export default function MediaPage() {
       setUploading(false);
     };
     input.click();
+  };
+
+  const handleWatermarkExisting = async (id: number) => {
+    setWatermarkingId(id);
+    try {
+      const res = await fetch(`/api/media/${id}/watermark`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ position: 'bottom-right' })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setFiles(prev => prev.map(f => (f.id === id ? { ...data.media, file_path: `${data.media.file_path}?t=${Date.now()}` } : f)));
+        alert('Logo watermark applied successfully!');
+      } else {
+        alert(data.error || 'Failed to apply watermark');
+      }
+    } catch {
+      alert('Error applying watermark');
+    } finally {
+      setWatermarkingId(null);
+    }
   };
 
   const handleDelete = async (id: number) => {
@@ -90,7 +115,11 @@ export default function MediaPage() {
     <div>
       <div className="dashboard-header-actions">
         <h1 style={{ fontSize: '2rem', fontWeight: 'bold' }}>Media Library</h1>
-        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'center' }}>
+          <label style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.85rem', cursor: 'pointer', backgroundColor: 'white', padding: '0.5rem 0.8rem', borderRadius: '6px', border: '1px solid var(--border-color)', userSelect: 'none' }} title="Automatically stamps your news logo watermark in the bottom-right corner of uploaded photos">
+            <input type="checkbox" checked={applyWatermark} onChange={e => setApplyWatermark(e.target.checked)} />
+            <span style={{ fontWeight: 500 }}>💧 Watermark Logo</span>
+          </label>
           <div style={{ display: 'flex', border: '1px solid var(--border-color)', borderRadius: '6px', overflow: 'hidden' }}>
             <button onClick={() => setViewMode('grid')} style={{ padding: '0.5rem 1rem', border: 'none', backgroundColor: viewMode === 'grid' ? 'var(--primary-color)' : 'white', color: viewMode === 'grid' ? 'white' : 'var(--text-dark)', cursor: 'pointer', fontWeight: 'bold' }}>Grid</button>
             <button onClick={() => setViewMode('list')} style={{ padding: '0.5rem 1rem', border: 'none', backgroundColor: viewMode === 'list' ? 'var(--primary-color)' : 'white', color: viewMode === 'list' ? 'white' : 'var(--text-dark)', cursor: 'pointer', fontWeight: 'bold' }}>List</button>
@@ -102,7 +131,7 @@ export default function MediaPage() {
       </div>
 
       {viewMode === 'grid' ? (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: '1.5rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(170px, 1fr))', gap: '1.5rem' }}>
           {files.map((file) => (
             <div key={file.id} style={{ backgroundColor: 'white', borderRadius: '8px', overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', position: 'relative' }}>
               <div style={{ height: '140px', backgroundColor: '#e5e7eb', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
@@ -118,7 +147,19 @@ export default function MediaPage() {
                   <span>{file.size}</span>
                   <span>{formatDate(file.created_at)}</span>
                 </div>
-                <button onClick={() => handleDelete(file.id)} style={{ marginTop: '0.5rem', width: '100%', padding: '0.4rem', border: '1px solid #fecaca', borderRadius: '4px', backgroundColor: '#fef2f2', color: '#ef4444', fontSize: '0.8rem', cursor: 'pointer', fontWeight: '500' }}>Delete</button>
+                <div style={{ display: 'flex', gap: '0.4rem', marginTop: '0.75rem' }}>
+                  {file.type === 'image' && (
+                    <button
+                      onClick={() => handleWatermarkExisting(file.id)}
+                      disabled={watermarkingId === file.id}
+                      style={{ flex: 1, padding: '0.4rem 0.5rem', border: '1px solid var(--border-color)', borderRadius: '4px', backgroundColor: '#f9fafb', color: 'var(--text-dark)', fontSize: '0.75rem', cursor: watermarkingId === file.id ? 'not-allowed' : 'pointer', fontWeight: '500', opacity: watermarkingId === file.id ? 0.6 : 1 }}
+                      title="Apply logo watermark to this image"
+                    >
+                      {watermarkingId === file.id ? 'Applying...' : '💧 Watermark'}
+                    </button>
+                  )}
+                  <button onClick={() => handleDelete(file.id)} style={{ padding: '0.4rem 0.6rem', border: '1px solid #fecaca', borderRadius: '4px', backgroundColor: '#fef2f2', color: '#ef4444', fontSize: '0.75rem', cursor: 'pointer', fontWeight: '500' }}>Delete</button>
+                </div>
               </div>
             </div>
           ))}
@@ -143,7 +184,16 @@ export default function MediaPage() {
                   <td style={{ padding: '1rem 1.5rem', color: 'var(--text-light)', textTransform: 'uppercase', fontSize: '0.85rem' }}>{file.type}</td>
                   <td style={{ padding: '1rem 1.5rem', color: 'var(--text-light)' }}>{file.size}</td>
                   <td style={{ padding: '1rem 1.5rem', color: 'var(--text-light)' }}>{formatDate(file.created_at)}</td>
-                  <td style={{ padding: '1rem 1.5rem', textAlign: 'right' }}>
+                  <td style={{ padding: '1rem 1.5rem', textAlign: 'right', display: 'flex', gap: '0.5rem', justifyContent: 'flex-end', alignItems: 'center' }}>
+                    {file.type === 'image' && (
+                      <button
+                        onClick={() => handleWatermarkExisting(file.id)}
+                        disabled={watermarkingId === file.id}
+                        style={{ padding: '0.3rem 0.6rem', border: '1px solid var(--border-color)', borderRadius: '4px', backgroundColor: 'white', color: 'var(--text-dark)', fontSize: '0.8rem', cursor: watermarkingId === file.id ? 'not-allowed' : 'pointer' }}
+                      >
+                        {watermarkingId === file.id ? 'Applying...' : '💧 Watermark'}
+                      </button>
+                    )}
                     <button onClick={() => handleDelete(file.id)} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', fontWeight: 'bold' }}>Delete</button>
                   </td>
                 </tr>

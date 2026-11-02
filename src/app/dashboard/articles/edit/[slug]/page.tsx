@@ -28,6 +28,7 @@ export default function EditArticlePage({ params }: { params: { slug: string } }
   const [author, setAuthor] = useState('Admin');
   const [saving, setSaving] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [watermarkImage, setWatermarkImage] = useState(true);
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(true);
   const [showMediaPicker, setShowMediaPicker] = useState(false);
@@ -216,6 +217,7 @@ export default function EditArticlePage({ params }: { params: { slug: string } }
     setUploadingImage(true);
     const formData = new FormData();
     formData.append('file', file);
+    formData.append('watermark', watermarkImage ? 'true' : 'false');
 
     try {
       const res = await fetch('/api/media', {
@@ -449,7 +451,13 @@ export default function EditArticlePage({ params }: { params: { slug: string } }
           </div>
 
           <div style={{ backgroundColor: 'white', padding: '1.5rem', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
-            <h3 style={{ fontSize: '1.1rem', fontWeight: 'bold', marginBottom: '1rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.5rem' }}>Featured Image</h3>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.5rem' }}>
+              <h3 style={{ fontSize: '1.1rem', fontWeight: 'bold', margin: 0 }}>Featured Image</h3>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem', cursor: 'pointer', color: 'var(--text-dark)', userSelect: 'none' }} title="Apply news logo watermark on upload">
+                <input type="checkbox" checked={watermarkImage} onChange={(e) => setWatermarkImage(e.target.checked)} />
+                <span style={{ fontWeight: 500 }}>💧 Watermark Logo</span>
+              </label>
+            </div>
             
             <input type="file" accept="image/*" id="featured-image-upload" style={{ display: 'none' }} onChange={handleImageUpload} disabled={uploadingImage} />
             
