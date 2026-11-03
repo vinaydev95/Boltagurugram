@@ -14,7 +14,16 @@ interface Category {
   color?: string;
 }
 
-let globalCategories: Category[] | null = null;
+const DEFAULT_CATEGORIES: Category[] = [
+  { id: 15, name: 'City', slug: 'city' },
+  { id: 2, name: 'Crime', slug: 'crime' },
+  { id: 5, name: 'Political', slug: 'political' },
+  { id: 7, name: 'Social', slug: 'social' },
+  { id: 4, name: 'Education', slug: 'education' },
+  { id: 6, name: 'Religious', slug: 'religious' },
+];
+
+let globalCategories: Category[] | null = DEFAULT_CATEGORIES;
 let globalBreaking: string | null = null;
 
 export default function Header() {

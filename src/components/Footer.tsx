@@ -11,8 +11,17 @@ interface Category {
   slug: string;
 }
 
+const DEFAULT_CATEGORIES: Category[] = [
+  { id: 15, name: 'City', slug: 'city' },
+  { id: 2, name: 'Crime', slug: 'crime' },
+  { id: 5, name: 'Political', slug: 'political' },
+  { id: 7, name: 'Social', slug: 'social' },
+  { id: 4, name: 'Education', slug: 'education' },
+  { id: 6, name: 'Religious', slug: 'religious' },
+];
+
 export default function Footer() {
-  const [categories, setCategories] = useState<Category[]>([]);
+  const [categories, setCategories] = useState<Category[]>(DEFAULT_CATEGORIES);
   const [email, setEmail] = useState('');
   const [subscribed, setSubscribed] = useState(false);
 
@@ -113,9 +122,10 @@ export default function Footer() {
               ))
             ) : (
               <>
-                <li><Link href="/category/national" className="footer-link" style={{ color: '#94a3b8', textDecoration: 'none' }}>National</Link></li>
+                <li><Link href="/category/city" className="footer-link" style={{ color: '#94a3b8', textDecoration: 'none' }}>City</Link></li>
                 <li><Link href="/category/crime" className="footer-link" style={{ color: '#94a3b8', textDecoration: 'none' }}>Crime</Link></li>
-                <li><Link href="/category/sports" className="footer-link" style={{ color: '#94a3b8', textDecoration: 'none' }}>Sports</Link></li>
+                <li><Link href="/category/political" className="footer-link" style={{ color: '#94a3b8', textDecoration: 'none' }}>Political</Link></li>
+                <li><Link href="/category/social" className="footer-link" style={{ color: '#94a3b8', textDecoration: 'none' }}>Social</Link></li>
               </>
             )}
           </ul>
@@ -134,7 +144,7 @@ export default function Footer() {
             paddingBottom: '0.5rem',
             display: 'inline-block'
           }}>
-            Company
+            Company & Policies
           </h3>
           <ul style={{ 
             listStyle: 'none', 
@@ -156,7 +166,7 @@ export default function Footer() {
                   display: 'inline-block'
                 }}
               >
-                About Us
+                About Us (हमारे बारे में)
               </Link>
             </li>
             <li>
@@ -170,7 +180,7 @@ export default function Footer() {
                   display: 'inline-block'
                 }}
               >
-                Contact Us
+                Contact Us (संपर्क करें)
               </Link>
             </li>
             <li>
@@ -184,7 +194,49 @@ export default function Footer() {
                   display: 'inline-block'
                 }}
               >
-                Privacy Policy
+                Privacy Policy (गोपनीयता नीति)
+              </Link>
+            </li>
+            <li>
+              <Link 
+                href="/terms" 
+                className="footer-link"
+                style={{ 
+                  color: '#94a3b8', 
+                  textDecoration: 'none',
+                  transition: 'all 0.2s ease',
+                  display: 'inline-block'
+                }}
+              >
+                Terms & Conditions (नियम व शर्तें)
+              </Link>
+            </li>
+            <li>
+              <Link 
+                href="/disclaimer" 
+                className="footer-link"
+                style={{ 
+                  color: '#94a3b8', 
+                  textDecoration: 'none',
+                  transition: 'all 0.2s ease',
+                  display: 'inline-block'
+                }}
+              >
+                Disclaimer (अस्वीकरण)
+              </Link>
+            </li>
+            <li>
+              <Link 
+                href="/editorial-policy" 
+                className="footer-link"
+                style={{ 
+                  color: '#94a3b8', 
+                  textDecoration: 'none',
+                  transition: 'all 0.2s ease',
+                  display: 'inline-block'
+                }}
+              >
+                Editorial & Grievance Policy (संपादकीय नीति)
               </Link>
             </li>
           </ul>

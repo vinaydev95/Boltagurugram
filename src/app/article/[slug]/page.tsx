@@ -107,8 +107,81 @@ export default async function ArticlePage({ params }: { params: { slug: string }
   const tags = article.tagsArray || [];
   const midAds = Array.isArray(adsResult) && Array.isArray(adsResult[0]) ? adsResult[0] : [];
 
+  const publishDate = article.created_at ? new Date(article.created_at).toISOString() : new Date().toISOString();
+  const modifiedDate = article.updated_at ? new Date(article.updated_at).toISOString() : publishDate;
+  const authorName = article.author || 'Bolta Gurugram Editorial Desk';
+
+  const articleSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'NewsArticle',
+    mainEntityOfPage: {
+      '@type': 'WebPage',
+      '@id': `https://boltagurugram.com/article/${article.slug}`,
+    },
+    headline: article.title,
+    description: article.excerpt || article.meta_description || article.title,
+    image: [
+      article.image_url || 'https://boltagurugram.com/logo.png',
+    ],
+    datePublished: publishDate,
+    dateModified: modifiedDate,
+    author: [
+      {
+        '@type': 'Person',
+        name: authorName,
+        jobTitle: 'News Reporter',
+        url: 'https://boltagurugram.com/about',
+      },
+    ],
+    publisher: {
+      '@type': 'NewsMediaOrganization',
+      name: 'Bolta Gurugram',
+      url: 'https://boltagurugram.com',
+      logo: {
+        '@type': 'ImageObject',
+        url: 'https://boltagurugram.com/logo.png',
+      },
+      publishingPrinciples: 'https://boltagurugram.com/editorial-policy',
+    },
+    inLanguage: 'hi',
+    articleSection: article.category_name,
+  };
+
+  const breadcrumbSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      {
+        '@type': 'ListItem',
+        position: 1,
+        name: 'Home',
+        item: 'https://boltagurugram.com',
+      },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        name: article.category_name || 'News',
+        item: `https://boltagurugram.com/category/${catSlug}`,
+      },
+      {
+        '@type': 'ListItem',
+        position: 3,
+        name: article.title,
+        item: `https://boltagurugram.com/article/${article.slug}`,
+      },
+    ],
+  };
+
   return (
     <div style={{ backgroundColor: 'var(--bg-color)', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
       <Header />
 
       <main style={{ maxWidth: '1200px', margin: '2rem auto', padding: '0 1rem', flex: 1, width: '100%' }}>
@@ -255,6 +328,21 @@ export default async function ArticlePage({ params }: { params: { slug: string }
                 ))}
               </div>
             )}
+
+            {/* Author Transparency Box (E-E-A-T) */}
+            <div style={{ backgroundColor: '#f8fafc', borderRadius: '8px', padding: '1.25rem', marginTop: '2rem', border: '1px solid #e2e8f0', display: 'flex', gap: '1rem', alignItems: 'center' }}>
+              <div style={{ width: '52px', height: '52px', borderRadius: '50%', backgroundColor: 'var(--primary-color)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '1.2rem', flexShrink: 0 }}>
+                {authorName.charAt(0)}
+              </div>
+              <div>
+                <h4 style={{ margin: '0 0 0.25rem 0', fontSize: '1rem', fontWeight: 'bold', color: 'var(--text-dark)' }}>
+                  Reported by {authorName}
+                </h4>
+                <p style={{ margin: 0, fontSize: '0.85rem', color: '#64748b', lineHeight: '1.5' }}>
+                  Journalist covering Gurugram administration, civic affairs, police investigations, and Haryana news. Verified under Bolta Gurugram&apos;s <Link href="/editorial-policy" style={{ color: 'var(--primary-color)', fontWeight: '600' }}>Editorial Policy</Link>.
+                </p>
+              </div>
+            </div>
 
             {/* Bottom Ad */}
             <AdBanner />

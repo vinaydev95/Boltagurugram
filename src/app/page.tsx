@@ -12,17 +12,19 @@ export const revalidate = 300;
 export default async function Home() {
   let latest: any[] = [];
   let trending: any[] = [];
-  let sportsArticles: any[] = [];
+  let cityArticles: any[] = [];
   let crimeArticles: any[] = [];
   let politicalArticles: any[] = [];
+  let socialArticles: any[] = [];
 
   try {
-    [latest, trending, sportsArticles, crimeArticles, politicalArticles] = await Promise.all([
+    [latest, trending, cityArticles, crimeArticles, politicalArticles, socialArticles] = await Promise.all([
       getLatestArticlesDB(14),
       getTrendingArticlesDB(5),
-      getArticlesByCategoryDB('sports', 4),
+      getArticlesByCategoryDB('city', 4),
       getArticlesByCategoryDB('crime', 4),
       getArticlesByCategoryDB('political', 4),
+      getArticlesByCategoryDB('social', 4),
     ]);
   } catch (error) {
     console.error('Homepage data fetch failed:', error);
@@ -136,14 +138,14 @@ export default async function Home() {
         {/* Category Sections */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '3rem' }}>
 
-          {/* Sports Section */}
+          {/* City Section */}
           <section>
             <h3 style={{ fontSize: '1.5rem', fontWeight: '900', borderBottom: '2px solid var(--text-dark)', paddingBottom: '0.5rem', marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
-              SPORTS
-              <Link href="/category/sports"><span style={{ fontSize: '0.85rem', fontWeight: 'normal', color: 'var(--primary-color)', cursor: 'pointer' }}>View All →</span></Link>
+              CITY NEWS
+              <Link href="/category/city"><span style={{ fontSize: '0.85rem', fontWeight: 'normal', color: 'var(--primary-color)', cursor: 'pointer' }}>View All →</span></Link>
             </h3>
             <div className="grid-4col">
-              {(sportsArticles.length > 0 ? sportsArticles : latest.slice(0, 4)).map((article: any) => (
+              {(cityArticles.length > 0 ? cityArticles : latest.slice(0, 4)).map((article: any) => (
                 <Link key={article.id} href={`/article/${article.slug}`}>
                   <div style={{ backgroundColor: 'white', borderRadius: '8px', overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', cursor: 'pointer' }}>
                     <div style={{ height: '160px', backgroundColor: '#e5e7eb', overflow: 'hidden' }}>
@@ -192,6 +194,29 @@ export default async function Home() {
             </h3>
             <div className="grid-4col">
               {(politicalArticles.length > 0 ? politicalArticles : latest.slice(0, 4)).map((article: any) => (
+                <Link key={article.id} href={`/article/${article.slug}`}>
+                  <div style={{ backgroundColor: 'white', borderRadius: '8px', overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', cursor: 'pointer' }}>
+                    <div style={{ height: '160px', backgroundColor: '#e5e7eb', overflow: 'hidden' }}>
+                    {article.image_url && <img src={article.image_url} alt={article.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
+                  </div>
+                    <div style={{ padding: '1rem' }}>
+                      <h4 style={{ fontSize: '1.1rem', fontWeight: 'bold', lineHeight: '1.3', marginBottom: '0.5rem' }}>{article.title}</h4>
+                      <span style={{ fontSize: '0.8rem', color: 'var(--text-light)' }}>{article.date}</span>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </section>
+
+          {/* Social Section */}
+          <section>
+            <h3 style={{ fontSize: '1.5rem', fontWeight: '900', borderBottom: '2px solid var(--text-dark)', paddingBottom: '0.5rem', marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+              SOCIAL & COMMUNITY
+              <Link href="/category/social"><span style={{ fontSize: '0.85rem', fontWeight: 'normal', color: 'var(--primary-color)', cursor: 'pointer' }}>View All →</span></Link>
+            </h3>
+            <div className="grid-4col">
+              {(socialArticles.length > 0 ? socialArticles : latest.slice(0, 4)).map((article: any) => (
                 <Link key={article.id} href={`/article/${article.slug}`}>
                   <div style={{ backgroundColor: 'white', borderRadius: '8px', overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', cursor: 'pointer' }}>
                     <div style={{ height: '160px', backgroundColor: '#e5e7eb', overflow: 'hidden' }}>

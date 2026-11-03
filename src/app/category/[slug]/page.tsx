@@ -57,7 +57,7 @@ export default async function CategoryPage({ params }: { params: { slug: string 
 
       <main style={{ maxWidth: '1200px', margin: '2rem auto', padding: '0 1rem', flex: 1, width: '100%' }}>
         <div style={{ borderBottom: '3px solid var(--primary-color)', paddingBottom: '1rem', marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
-          <h1 className="page-title">LATEST NEWS</h1>
+          <h1 className="page-title">{categoryName.toUpperCase()} NEWS</h1>
         </div>
 
         {categoryArticles.length === 0 ? (
