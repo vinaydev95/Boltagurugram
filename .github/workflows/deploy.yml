@@ -21,9 +21,9 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           port: 22
           script: |
-            set -e
             cd ~/bolta-gurugram
-            git pull origin main
+            git fetch origin main
+            git reset --hard origin/main
             npm install
             rm -rf .next
             npm run build
