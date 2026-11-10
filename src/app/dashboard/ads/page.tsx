@@ -89,6 +89,7 @@ export default function AdsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isMediaPickerOpen, setIsMediaPickerOpen] = useState(false);
   const [publishMode, setPublishMode] = useState<'immediate' | 'scheduled'>('immediate');
+  const [uploadingAdImage, setUploadingAdImage] = useState(false);
   
   const [formData, setFormData] = useState({
     id: null as number | null,
@@ -147,6 +148,36 @@ export default function AdsPage() {
     setPublishMode(isScheduled ? 'scheduled' : 'immediate');
     setFormData({ ...ad, position: ad.position ? ad.position.split(',') : [], starts_at: localStartsAt, expires_at: localExpiresAt });
     setIsModalOpen(true);
+  };
+
+  const handleAdImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingAdImage(true);
+    const data = new FormData();
+    data.append('file', file);
+    data.append('watermark', 'false');
+    data.append('is_ad', 'true');
+
+    try {
+      const res = await fetch('/api/media', {
+        method: 'POST',
+        body: data,
+      });
+      const result = await res.json();
+      if (result.success) {
+        setFormData(prev => ({ ...prev, image_url: result.media.file_path }));
+      } else {
+        alert(result.error || 'Failed to upload ad image');
+      }
+    } catch {
+      alert('Error uploading ad image');
+    } finally {
+      setUploadingAdImage(false);
+      // Reset input value so same file can be selected again if needed
+      e.target.value = '';
+    }
   };
 
   const handleSave = async (e: React.FormEvent) => {
@@ -210,7 +241,7 @@ export default function AdsPage() {
 
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
         <h1 style={{ fontSize: '1.75rem', fontWeight: 'bold' }}>Advertisement Management</h1>
         <button onClick={openAddModal} style={{ backgroundColor: 'var(--primary-color)', color: 'white', padding: '0.5rem 1rem', borderRadius: '4px', border: 'none', fontWeight: 'bold', cursor: 'pointer' }}>
           + Add Advertisement
@@ -218,48 +249,95 @@ export default function AdsPage() {
       </div>
 
       <div style={{ backgroundColor: 'white', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', overflow: 'hidden' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-          <thead>
-            <tr style={{ backgroundColor: '#f9fafb', borderBottom: '1px solid var(--border-color)' }}>
-              <th style={{ padding: '1rem' }}>Banner</th>
-              <th style={{ padding: '1rem' }}>Title</th>
-              <th style={{ padding: '1rem' }}>Position</th>
-              <th style={{ padding: '1rem' }}>Status</th>
-              <th style={{ padding: '1rem' }}>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {ads.length === 0 ? (
-              <tr><td colSpan={5} style={{ padding: '2rem', textAlign: 'center', color: '#6b7280' }}>No advertisements found</td></tr>
-            ) : ads.map(ad => (
-              <tr key={ad.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
-                <td style={{ padding: '1rem' }}>
-                  <img src={ad.image_url} alt={ad.title} style={{ height: '40px', objectFit: 'cover', borderRadius: '4px' }} />
-                </td>
-                <td style={{ padding: '1rem', fontWeight: '500' }}>{ad.title}</td>
-                <td style={{ padding: '1rem' }}>{ad.position}</td>
-
-                <td style={{ padding: '1rem' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <button onClick={() => toggleActive(ad)} style={{ padding: '0.25rem 0.5rem', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 'bold', border: 'none', cursor: 'pointer', backgroundColor: ad.active ? '#dcfce7' : '#fee2e2', color: ad.active ? '#166534' : '#991b1b' }}>
-                      {ad.active ? 'Active' : 'Inactive'}
-                    </button>
-                    <LiveTimer startsAt={ad.starts_at} expiresAt={ad.expires_at} />
-                  </div>
-                </td>
-                <td style={{ padding: '1rem' }}>
-                  <button onClick={() => openEditModal(ad)} style={{ marginRight: '0.5rem', padding: '0.25rem 0.5rem', border: '1px solid var(--border-color)', borderRadius: '4px', cursor: 'pointer', backgroundColor: 'white' }}>Edit</button>
-                  <button onClick={() => handleDelete(ad.id)} style={{ padding: '0.25rem 0.5rem', border: '1px solid #fecaca', borderRadius: '4px', cursor: 'pointer', backgroundColor: '#fef2f2', color: '#dc2626' }}>Delete</button>
-                </td>
+        <div className="table-scroll-wrapper" style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '650px' }}>
+            <thead>
+              <tr style={{ backgroundColor: '#f9fafb', borderBottom: '1px solid var(--border-color)' }}>
+                <th style={{ padding: '1rem', whiteSpace: 'nowrap' }}>Banner</th>
+                <th style={{ padding: '1rem', whiteSpace: 'nowrap' }}>Title</th>
+                <th style={{ padding: '1rem', whiteSpace: 'nowrap' }}>Position</th>
+                <th style={{ padding: '1rem', whiteSpace: 'nowrap' }}>Status</th>
+                <th style={{ 
+                  padding: '1rem', 
+                  whiteSpace: 'nowrap', 
+                  position: 'sticky', 
+                  right: 0, 
+                  backgroundColor: '#f9fafb', 
+                  zIndex: 2,
+                  boxShadow: '-2px 0 4px rgba(0,0,0,0.05)',
+                  textAlign: 'right'
+                }}>
+                  Actions
+                </th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {ads.length === 0 ? (
+                <tr><td colSpan={5} style={{ padding: '2rem', textAlign: 'center', color: '#6b7280' }}>No advertisements found</td></tr>
+              ) : ads.map(ad => (
+                <tr key={ad.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
+                  <td style={{ padding: '1rem', whiteSpace: 'nowrap' }}>
+                    <img src={ad.image_url} alt={ad.title} style={{ height: '40px', objectFit: 'cover', borderRadius: '4px' }} />
+                  </td>
+                  <td style={{ padding: '1rem', fontWeight: '500', maxWidth: '160px' }}>{ad.title}</td>
+                  <td style={{ padding: '1rem' }}>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.25rem', maxWidth: '220px' }}>
+                      {ad.position ? ad.position.split(',').map((p: string) => {
+                        const trimmed = p.trim();
+                        const label = 
+                          trimmed === 'home_banner' ? 'Home' : 
+                          trimmed === 'sidebar' ? 'Sidebar' : 
+                          trimmed === 'article_top' ? 'Top' : 
+                          trimmed === 'article_mid' ? 'Mid' : 
+                          trimmed === 'article_bottom' ? 'Bottom' : trimmed;
+                        return (
+                          <span key={trimmed} style={{ 
+                            backgroundColor: '#f3f4f6', 
+                            color: '#374151', 
+                            padding: '0.15rem 0.4rem', 
+                            borderRadius: '4px', 
+                            fontSize: '0.75rem', 
+                            fontWeight: 500,
+                            whiteSpace: 'nowrap' 
+                          }}>
+                            {label}
+                          </span>
+                        );
+                      }) : '—'}
+                    </div>
+                  </td>
+
+                  <td style={{ padding: '1rem', whiteSpace: 'nowrap' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <button onClick={() => toggleActive(ad)} style={{ padding: '0.25rem 0.5rem', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 'bold', border: 'none', cursor: 'pointer', backgroundColor: ad.active ? '#dcfce7' : '#fee2e2', color: ad.active ? '#166534' : '#991b1b' }}>
+                        {ad.active ? 'Active' : 'Inactive'}
+                      </button>
+                      <LiveTimer startsAt={ad.starts_at} expiresAt={ad.expires_at} />
+                    </div>
+                  </td>
+                  <td style={{ 
+                    padding: '1rem', 
+                    whiteSpace: 'nowrap',
+                    position: 'sticky',
+                    right: 0,
+                    backgroundColor: 'white',
+                    zIndex: 1,
+                    boxShadow: '-2px 0 4px rgba(0,0,0,0.05)',
+                    textAlign: 'right'
+                  }}>
+                    <button onClick={() => openEditModal(ad)} style={{ marginRight: '0.5rem', padding: '0.3rem 0.6rem', border: '1px solid var(--border-color)', borderRadius: '4px', cursor: 'pointer', backgroundColor: 'white', fontWeight: '500' }}>Edit</button>
+                    <button onClick={() => handleDelete(ad.id)} style={{ padding: '0.3rem 0.6rem', border: '1px solid #fecaca', borderRadius: '4px', cursor: 'pointer', backgroundColor: '#fef2f2', color: '#dc2626', fontWeight: '500' }}>Delete</button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {isModalOpen && (
-        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <div style={{ backgroundColor: 'white', padding: '2rem', borderRadius: '8px', width: '100%', maxWidth: '500px' }}>
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
+          <div style={{ backgroundColor: 'white', padding: '1.5rem', borderRadius: '8px', width: '100%', maxWidth: '500px', maxHeight: '90vh', overflowY: 'auto' }}>
             <h2 style={{ fontSize: '1.25rem', fontWeight: 'bold', marginBottom: '1.5rem' }}>{formData.id ? 'Edit' : 'Add'} Advertisement</h2>
             <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               <div>
@@ -335,14 +413,32 @@ export default function AdsPage() {
                 <span style={{ fontSize: '0.8rem', color: 'var(--text-light)', marginTop: '0.25rem', display: 'block' }}>Ad will stop showing at 11:59 PM on this date. Leave empty for no expiration.</span>
               </div>
               <div>
-                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold', fontSize: '0.9rem' }}>Banner Image</label>
+                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold', fontSize: '0.9rem' }}>Banner Image (Never watermarked)</label>
                 {formData.image_url && (
                   <div style={{ marginBottom: '0.5rem', position: 'relative', borderRadius: '6px', overflow: 'hidden', border: '1px solid var(--border-color)' }}>
                     <img src={formData.image_url} alt="Banner preview" style={{ width: '100%', display: 'block', maxHeight: '150px', objectFit: 'cover' }} />
                     <button type="button" onClick={() => setFormData({...formData, image_url: ''})} style={{ position: 'absolute', top: '0.25rem', right: '0.25rem', background: 'rgba(0,0,0,0.6)', color: 'white', border: 'none', borderRadius: '50%', width: '24px', height: '24px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '0.75rem' }}>✕</button>
                   </div>
                 )}
-                <button type="button" onClick={() => setIsMediaPickerOpen(true)} style={{ width: '100%', padding: '0.5rem 1rem', border: '1px solid var(--border-color)', borderRadius: '4px', cursor: 'pointer', backgroundColor: '#f3f4f6', fontWeight: 'bold' }}>🖼️ {formData.image_url ? 'Change Image' : 'Select Image from Media Library'}</button>
+                <input
+                  type="file"
+                  accept="image/*"
+                  id="ad-banner-file-input"
+                  style={{ display: 'none' }}
+                  onChange={handleAdImageUpload}
+                  disabled={uploadingAdImage}
+                />
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <label
+                    htmlFor="ad-banner-file-input"
+                    style={{ flex: 1, padding: '0.6rem 0.75rem', border: '1px solid var(--border-color)', borderRadius: '4px', cursor: uploadingAdImage ? 'not-allowed' : 'pointer', backgroundColor: '#f3f4f6', fontWeight: 'bold', fontSize: '0.85rem', textAlign: 'center', display: 'block' }}
+                  >
+                    {uploadingAdImage ? '⏳ Uploading...' : '📁 Upload Clean Banner'}
+                  </label>
+                  <button type="button" onClick={() => setIsMediaPickerOpen(true)} style={{ flex: 1, padding: '0.6rem 0.75rem', border: '1px solid var(--border-color)', borderRadius: '4px', cursor: 'pointer', backgroundColor: 'white', fontWeight: 'bold', fontSize: '0.85rem' }}>
+                    🖼️ Select from Library
+                  </button>
+                </div>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.5rem' }}>
                 <input type="checkbox" checked={formData.active} onChange={e => setFormData({...formData, active: e.target.checked})} id="active-checkbox" />

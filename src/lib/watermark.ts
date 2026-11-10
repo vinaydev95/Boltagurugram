@@ -3,7 +3,7 @@ import path from 'path';
 import fs from 'fs';
 
 export interface WatermarkOptions {
-  position?: 'bottom-right' | 'bottom-left' | 'top-right' | 'top-left' | 'center';
+  position?: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left' | 'center';
   opacity?: number; // 0.1 to 1.0 (default 0.95)
   scaleRatio?: number; // ratio of image width, default 0.22 (22%)
   paddingRatio?: number; // ratio of minimum dimension, default 0.025 (2.5%)
@@ -19,10 +19,10 @@ export async function applyWatermark(
   options: WatermarkOptions = {}
 ): Promise<{ buffer: Buffer; format: string; width: number; height: number; mimeType: string }> {
   const {
-    position = 'bottom-right',
-    opacity = 0.95,
-    scaleRatio = 0.22,
-    paddingRatio = 0.025,
+    position = 'top-right',
+    opacity = 1.0,
+    scaleRatio = 0.14,
+    paddingRatio = 0.035,
     logoPath = path.join(process.cwd(), 'public', 'logo.png'),
   } = options;
 
@@ -46,17 +46,17 @@ export async function applyWatermark(
   const trimmedMeta = await sharp(trimmedLogoBuffer).metadata();
   const logoAspect = (trimmedMeta.width || 1224) / (trimmedMeta.height || 761);
 
-  // Determine watermark width (proportional to image width)
+  // Determine watermark width (proportional to image width, compact news bug size)
   let wmWidth = Math.round(imgWidth * scaleRatio);
-  wmWidth = Math.max(70, Math.min(380, wmWidth));
-  if (wmWidth > imgWidth * 0.40) {
-    wmWidth = Math.round(imgWidth * 0.40);
+  wmWidth = Math.max(55, Math.min(220, wmWidth));
+  if (wmWidth > imgWidth * 0.28) {
+    wmWidth = Math.round(imgWidth * 0.28);
   }
 
-  // Ensure height does not exceed 35% of image height
+  // Ensure height does not exceed 25% of image height
   const estimatedHeight = Math.round(wmWidth / logoAspect);
-  if (estimatedHeight > imgHeight * 0.35) {
-    wmWidth = Math.round(imgHeight * 0.35 * logoAspect);
+  if (estimatedHeight > imgHeight * 0.25) {
+    wmWidth = Math.round(imgHeight * 0.25 * logoAspect);
   }
 
   // Resize logo keeping aspect ratio
@@ -84,8 +84,8 @@ export async function applyWatermark(
   const actualLogoWidth = logoMeta.width || wmWidth;
   const actualLogoHeight = logoMeta.height || Math.round(wmWidth / logoAspect);
 
-  // Calculate padding based on smaller image dimension
-  const padding = Math.max(10, Math.round(Math.min(imgWidth, imgHeight) * paddingRatio));
+  // Calculate padding based on smaller image dimension (minimum 14px for clean margin)
+  const padding = Math.max(14, Math.round(Math.min(imgWidth, imgHeight) * paddingRatio));
 
   let left = 0;
   let top = 0;
@@ -95,22 +95,22 @@ export async function applyWatermark(
       left = padding;
       top = padding;
       break;
-    case 'top-right':
-      left = Math.max(0, imgWidth - actualLogoWidth - padding);
-      top = padding;
-      break;
     case 'bottom-left':
       left = padding;
+      top = Math.max(0, imgHeight - actualLogoHeight - padding);
+      break;
+    case 'bottom-right':
+      left = Math.max(0, imgWidth - actualLogoWidth - padding);
       top = Math.max(0, imgHeight - actualLogoHeight - padding);
       break;
     case 'center':
       left = Math.max(0, Math.round((imgWidth - actualLogoWidth) / 2));
       top = Math.max(0, Math.round((imgHeight - actualLogoHeight) / 2));
       break;
-    case 'bottom-right':
+    case 'top-right':
     default:
       left = Math.max(0, imgWidth - actualLogoWidth - padding);
-      top = Math.max(0, imgHeight - actualLogoHeight - padding);
+      top = padding;
       break;
   }
 

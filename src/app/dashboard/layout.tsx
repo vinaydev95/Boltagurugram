@@ -202,7 +202,7 @@ export default function DashboardLayout({
       </button>
 
       {/* Main Content */}
-      <main style={{ flex: 1, padding: '2rem', overflowY: 'auto', minWidth: 0 }}>
+      <main className="dashboard-main" style={{ flex: 1, padding: '2rem', overflowY: 'auto', minWidth: 0 }}>
         <header style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '2rem', paddingBottom: '1rem', borderBottom: '1px solid var(--border-color)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
             <span>{user.name} ({user.role})</span>

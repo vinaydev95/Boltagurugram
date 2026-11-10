@@ -7,17 +7,22 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const position = searchParams.get('position');
     const activeOnly = searchParams.get('activeOnly') === 'true';
+    const articleDate = searchParams.get('articleDate');
 
     let query = 'SELECT * FROM advertisements';
     const params: any[] = [];
     const conditions: string[] = [];
 
     if (position) {
-      conditions.push('position = ?');
+      conditions.push('(FIND_IN_SET(?, position) > 0 OR position IS NULL OR position = \'\')');
       params.push(position);
     }
     if (activeOnly) {
       conditions.push('active = 1 AND (expires_at IS NULL OR expires_at > NOW()) AND (starts_at IS NULL OR starts_at <= NOW())');
+    }
+    if (articleDate) {
+      conditions.push('COALESCE(starts_at, created_at) <= ?');
+      params.push(new Date(articleDate));
     }
 
     if (conditions.length > 0) {

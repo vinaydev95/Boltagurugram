@@ -57,15 +57,15 @@ async function applyWatermark(imageBuffer) {
   const trimmedMeta = await sharp(trimmedLogoBuffer).metadata();
   const logoAspect = (trimmedMeta.width || 1224) / (trimmedMeta.height || 761);
 
-  let wmWidth = Math.round(imgWidth * 0.22);
-  wmWidth = Math.max(70, Math.min(380, wmWidth));
-  if (wmWidth > imgWidth * 0.40) {
-    wmWidth = Math.round(imgWidth * 0.40);
+  let wmWidth = Math.round(imgWidth * 0.14);
+  wmWidth = Math.max(55, Math.min(220, wmWidth));
+  if (wmWidth > imgWidth * 0.28) {
+    wmWidth = Math.round(imgWidth * 0.28);
   }
 
   const estimatedHeight = Math.round(wmWidth / logoAspect);
-  if (estimatedHeight > imgHeight * 0.35) {
-    wmWidth = Math.round(imgHeight * 0.35 * logoAspect);
+  if (estimatedHeight > imgHeight * 0.25) {
+    wmWidth = Math.round(imgHeight * 0.25 * logoAspect);
   }
 
   const logoSharp = sharp(trimmedLogoBuffer).resize({
@@ -73,7 +73,7 @@ async function applyWatermark(imageBuffer) {
     fit: 'inside',
   });
 
-  const alphaValue = Math.round(255 * 0.95);
+  const alphaValue = 255;
   const logoWithOpacity = await logoSharp
     .ensureAlpha()
     .composite([
@@ -90,9 +90,9 @@ async function applyWatermark(imageBuffer) {
   const actualLogoWidth = logoMeta.width || wmWidth;
   const actualLogoHeight = logoMeta.height || Math.round(wmWidth / logoAspect);
 
-  const padding = Math.max(10, Math.round(Math.min(imgWidth, imgHeight) * 0.025));
+  const padding = Math.max(14, Math.round(Math.min(imgWidth, imgHeight) * 0.035));
   const left = Math.max(0, imgWidth - actualLogoWidth - padding);
-  const top = Math.max(0, imgHeight - actualLogoHeight - padding);
+  const top = padding;
 
   const watermarkedBuffer = await baseImageInstance
     .composite([{ input: logoWithOpacity, left, top }])
@@ -114,7 +114,7 @@ async function main() {
 
   console.log('🔍 Finding images to watermark...');
 
-  let query = "SELECT id, name, file_path FROM media WHERE type = 'image'";
+  let query = "SELECT id, name, file_path FROM media WHERE type = 'image' AND file_path NOT IN (SELECT image_url FROM advertisements WHERE image_url IS NOT NULL)";
   const queryParams = [];
   if (specificId) {
     query += ' AND id = ?';

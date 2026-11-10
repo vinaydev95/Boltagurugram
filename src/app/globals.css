@@ -513,6 +513,10 @@ ul {
   }
 
   /* Dashboard */
+  .dashboard-main {
+    padding: 1rem 0.75rem !important;
+  }
+
   .dashboard-sidebar {
     position: fixed;
     top: 0;

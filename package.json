@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "watermark:batch": "node scripts/watermark-existing.mjs"
+    "watermark:batch": "node scripts/watermark-existing.mjs",
+    "watermark:migrate": "node scripts/migrate-all-bottom-watermarks.mjs",
+    "ads:clean-watermark": "node scripts/remove-ads-watermark.mjs"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1045.0",

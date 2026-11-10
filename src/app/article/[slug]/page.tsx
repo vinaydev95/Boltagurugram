@@ -91,11 +91,20 @@ export default async function ArticlePage({ params }: { params: { slug: string }
   let adsResult: any = [[]];
 
   try {
+    const articleDate = article.created_at ? new Date(article.created_at) : new Date();
+
     [related, latestArticles, adsResult] = await Promise.all([
       getRelatedArticlesDB(article.slug, article.category_id, 4),
       getLatestArticlesDB(5),
       pool.query<RowDataPacket[]>(
-        'SELECT * FROM advertisements WHERE active = 1 AND (expires_at IS NULL OR expires_at > NOW()) AND (starts_at IS NULL OR starts_at <= NOW()) ORDER BY id DESC'
+        `SELECT * FROM advertisements 
+         WHERE (FIND_IN_SET('article_mid', position) > 0 OR position IS NULL OR position = '')
+           AND active = 1 
+           AND (expires_at IS NULL OR expires_at > NOW()) 
+           AND (starts_at IS NULL OR starts_at <= NOW()) 
+           AND COALESCE(starts_at, created_at) <= ? 
+         ORDER BY id DESC`,
+        [articleDate]
       ).catch(() => [[] as RowDataPacket[]]),
     ]);
   } catch (error) {
@@ -200,8 +209,8 @@ export default async function ArticlePage({ params }: { params: { slug: string }
           {/* Main Article Content */}
           <article className="article-card" style={{ backgroundColor: 'white', padding: '2.5rem', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
 
-            {/* Top Ad */}
-            <AdBanner />
+            {/* Top Ad (only shows ads published before or on this article's date) */}
+            <AdBanner position="article_top" articleDate={article.created_at} />
 
 
 
@@ -345,7 +354,7 @@ export default async function ArticlePage({ params }: { params: { slug: string }
             </div>
 
             {/* Bottom Ad */}
-            <AdBanner />
+            <AdBanner position="article_bottom" articleDate={article.created_at} />
           </article>
 
           {/* Right Sidebar */}
@@ -367,7 +376,7 @@ export default async function ArticlePage({ params }: { params: { slug: string }
                 ))}
               </ul>
               {/* Advertisement */}
-              <AdBanner />
+              <AdBanner position="sidebar" articleDate={article.created_at} />
             </div>
 
             {/* Newsletter box */}
@@ -379,7 +388,7 @@ export default async function ArticlePage({ params }: { params: { slug: string }
             </div>
 
             <div style={{ backgroundColor: 'white', borderRadius: '8px', padding: '1rem', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
-              <AdBanner />
+              <AdBanner position="sidebar" articleDate={article.created_at} />
             </div>
           </aside>
         </div>

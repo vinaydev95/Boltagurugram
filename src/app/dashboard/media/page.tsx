@@ -73,7 +73,7 @@ export default function MediaPage() {
       const res = await fetch(`/api/media/${id}/watermark`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ position: 'bottom-right' })
+        body: JSON.stringify({ position: 'top-right' })
       });
       const data = await res.json();
       if (data.success) {
@@ -116,7 +116,7 @@ export default function MediaPage() {
       <div className="dashboard-header-actions">
         <h1 style={{ fontSize: '2rem', fontWeight: 'bold' }}>Media Library</h1>
         <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'center' }}>
-          <label style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.85rem', cursor: 'pointer', backgroundColor: 'white', padding: '0.5rem 0.8rem', borderRadius: '6px', border: '1px solid var(--border-color)', userSelect: 'none' }} title="Automatically stamps your news logo watermark in the bottom-right corner of uploaded photos">
+          <label style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.85rem', cursor: 'pointer', backgroundColor: 'white', padding: '0.5rem 0.8rem', borderRadius: '6px', border: '1px solid var(--border-color)', userSelect: 'none' }} title="Automatically stamps your news logo watermark in the top-right corner of uploaded photos">
             <input type="checkbox" checked={applyWatermark} onChange={e => setApplyWatermark(e.target.checked)} />
             <span style={{ fontWeight: 500 }}>💧 Watermark Logo</span>
           </label>

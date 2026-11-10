@@ -29,7 +29,19 @@ export async function POST(
       return NextResponse.json({ error: 'File is not an image' }, { status: 400 });
     }
 
-    let position: WatermarkOptions['position'] = 'bottom-right';
+    // Do NOT watermark images that are used as advertisements
+    const [adRows] = await pool.query<RowDataPacket[]>(
+      'SELECT id FROM advertisements WHERE image_url = ?',
+      [media.file_path]
+    );
+    if (adRows.length > 0) {
+      return NextResponse.json(
+        { error: 'This image is linked to an advertisement and cannot be watermarked.' },
+        { status: 400 }
+      );
+    }
+
+    let position: WatermarkOptions['position'] = 'top-right';
     try {
       const body = await request.json().catch(() => ({}));
       if (body?.position) {

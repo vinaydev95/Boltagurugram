@@ -32,10 +32,13 @@ export async function POST(request: NextRequest) {
     let buffer: Buffer = Buffer.from(bytes) as unknown as Buffer;
     let contentType = file.type;
 
-    // Check if watermark is requested (default: true for raster images)
+    // Watermark is DEFAULT for all images, EXCEPT:
+    // 1) Ads (is_ad === true) -> NEVER watermarked
+    // 2) Explicit opt-out (watermark === 'false' or '0')
+    const isAd = formData.get('is_ad') === 'true' || formData.get('type') === 'ad' || formData.get('category') === 'ad';
     const watermarkParam = formData.get('watermark');
-    const shouldWatermark = watermarkParam === null || watermarkParam === undefined || watermarkParam === 'true' || watermarkParam === '1';
-    const watermarkPosition = (formData.get('watermarkPosition') as WatermarkOptions['position']) || 'bottom-right';
+    const shouldWatermark = !isAd && watermarkParam !== 'false' && watermarkParam !== '0';
+    const watermarkPosition = (formData.get('watermarkPosition') as WatermarkOptions['position']) || 'top-right';
 
     const isRasterImage = file.type.startsWith('image/') && !file.type.includes('svg') && !file.type.includes('gif');
 
