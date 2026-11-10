@@ -21,9 +21,11 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           port: 22
           script: |
+            set -e
             cd ~/bolta-gurugram
             git pull origin main
             npm install
+            rm -rf .next
             npm run build
             mkdir -p logs
             pm2 delete bolta-gurugram 2>/dev/null || true
