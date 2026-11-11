@@ -51,35 +51,44 @@ export async function DELETE(
 
     const media = rows[0];
 
-    // Try to delete from S3
-    try {
-      const region = process.env.AWS_REGION || 'eu-north-1';
-      const bucket = process.env.S3_BUCKET_NAME?.trim();
-      const accessKey = process.env.AWS_ACCESS_KEY_ID;
-      const secretKey = process.env.AWS_SECRET_ACCESS_KEY;
+    // Check if this file is currently used by an advertisement
+    const [adUsage] = await pool.query<RowDataPacket[]>(
+      'SELECT id, title FROM advertisements WHERE image_url = ?',
+      [media.file_path]
+    );
+    const isUsedByAd = adUsage.length > 0;
 
-      if (bucket && accessKey && secretKey) {
-        const { S3Client, DeleteObjectCommand } = await import('@aws-sdk/client-s3');
+    // Only delete from S3 if it is NOT used by an advertisement (protects live ads)
+    if (!isUsedByAd) {
+      try {
+        const region = process.env.AWS_REGION || 'eu-north-1';
+        const bucket = process.env.S3_BUCKET_NAME?.trim();
+        const accessKey = process.env.AWS_ACCESS_KEY_ID;
+        const secretKey = process.env.AWS_SECRET_ACCESS_KEY;
 
-        const s3 = new S3Client({
-          region,
-          credentials: {
-            accessKeyId: accessKey,
-            secretAccessKey: secretKey,
-          },
-        });
+        if (bucket && accessKey && secretKey) {
+          const { S3Client, DeleteObjectCommand } = await import('@aws-sdk/client-s3');
 
-        // Extract S3 key from the full URL
-        const url = new URL(media.file_path);
-        const s3Key = url.pathname.substring(1); // Remove leading /
+          const s3 = new S3Client({
+            region,
+            credentials: {
+              accessKeyId: accessKey,
+              secretAccessKey: secretKey,
+            },
+          });
 
-        await s3.send(new DeleteObjectCommand({
-          Bucket: bucket,
-          Key: s3Key,
-        }));
+          // Extract S3 key from the full URL
+          const url = new URL(media.file_path);
+          const s3Key = url.pathname.substring(1); // Remove leading /
+
+          await s3.send(new DeleteObjectCommand({
+            Bucket: bucket,
+            Key: s3Key,
+          }));
+        }
+      } catch (s3Error) {
+        console.error('S3 delete error (continuing with DB delete):', s3Error);
       }
-    } catch (s3Error) {
-      console.error('S3 delete error (continuing with DB delete):', s3Error);
     }
 
     // Delete from database

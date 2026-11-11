@@ -98,6 +98,20 @@ export async function POST(request: NextRequest) {
       sizeStr = (sizeBytes / 1024).toFixed(0) + ' KB';
     }
 
+    // Ads should NEVER be added to the general media library
+    if (isAd) {
+      return NextResponse.json({
+        success: true,
+        media: {
+          id: null,
+          name: file.name,
+          file_path: fileUrl,
+          size: sizeStr,
+          type: 'image',
+        },
+      }, { status: 201 });
+    }
+
     // Save to database
     const [result] = await pool.query<ResultSetHeader>(
       'INSERT INTO media (name, file_path, size, type) VALUES (?, ?, ?, ?)',
