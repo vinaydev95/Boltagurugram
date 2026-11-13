@@ -1,6 +1,29 @@
 import pool from '@/lib/db';
 import { RowDataPacket } from 'mysql2';
 
+// In-memory cache for cross-region DB queries (EC2 Mumbai -> RDS Sweden)
+// Prevents pool queue exhaustion when Googlebot / multiple visitors crawl simultaneously
+const queryCache = new Map<string, { data: any; expiry: number }>();
+
+function getCached<T>(key: string): T | null {
+  const item = queryCache.get(key);
+  if (!item) return null;
+  if (Date.now() > item.expiry) {
+    queryCache.delete(key);
+    return null;
+  }
+  return item.data as T;
+}
+
+function setCache(key: string, data: any, ttlMs: number = 60000) {
+  // Cap cache size to 500 items to protect memory
+  if (queryCache.size > 500) {
+    const oldestKey = queryCache.keys().next().value;
+    if (oldestKey) queryCache.delete(oldestKey);
+  }
+  queryCache.set(key, { data, expiry: Date.now() + ttlMs });
+}
+
 // ============================================
 // SERVER-SIDE DATA FUNCTIONS
 // These fetch directly from MySQL for server components
@@ -68,6 +91,10 @@ function normalizeArticle(row: any) {
 // ------- ARTICLE QUERIES -------
 
 export async function getLatestArticlesDB(count: number = 14) {
+  const cacheKey = `latest_${count}`;
+  const cached = getCached<any[]>(cacheKey);
+  if (cached) return cached;
+
   try {
     const [rows] = await pool.query<RowDataPacket[]>(
       `SELECT a.*, c.name as category_name, c.slug as category_slug, c.color as category_color
@@ -78,7 +105,9 @@ export async function getLatestArticlesDB(count: number = 14) {
        LIMIT ?`,
       [count]
     );
-    return rows.map(normalizeArticle);
+    const result = rows.map(normalizeArticle);
+    setCache(cacheKey, result, 60000); // cache for 60s
+    return result;
   } catch (error) {
     console.error('getLatestArticlesDB error:', error);
     return [];
@@ -86,6 +115,10 @@ export async function getLatestArticlesDB(count: number = 14) {
 }
 
 export async function getTrendingArticlesDB(count: number = 5) {
+  const cacheKey = `trending_${count}`;
+  const cached = getCached<any[]>(cacheKey);
+  if (cached) return cached;
+
   try {
     const [rows] = await pool.query<RowDataPacket[]>(
       `SELECT a.*, c.name as category_name, c.slug as category_slug, c.color as category_color
@@ -96,7 +129,9 @@ export async function getTrendingArticlesDB(count: number = 5) {
        LIMIT ?`,
       [count]
     );
-    return rows.map(normalizeArticle);
+    const result = rows.map(normalizeArticle);
+    setCache(cacheKey, result, 60000); // cache for 60s
+    return result;
   } catch (error) {
     console.error('getTrendingArticlesDB error:', error);
     return [];
@@ -104,6 +139,10 @@ export async function getTrendingArticlesDB(count: number = 5) {
 }
 
 export async function getArticlesByCategoryDB(categorySlug: string, count: number = 10) {
+  const cacheKey = `cat_${categorySlug}_${count}`;
+  const cached = getCached<any[]>(cacheKey);
+  if (cached) return cached;
+
   try {
     const [rows] = await pool.query<RowDataPacket[]>(
       `SELECT a.*, c_primary.name as category_name, c_primary.slug as category_slug, c_primary.color as category_color
@@ -116,7 +155,9 @@ export async function getArticlesByCategoryDB(categorySlug: string, count: numbe
        LIMIT ?`,
       [categorySlug, count]
     );
-    return rows.map(normalizeArticle);
+    const result = rows.map(normalizeArticle);
+    setCache(cacheKey, result, 60000); // cache for 60s
+    return result;
   } catch (error) {
     console.error('getArticlesByCategoryDB error:', error);
     return [];
@@ -132,6 +173,10 @@ export async function incrementArticleViewsDB(slug: string) {
 }
 
 export async function getArticleBySlugDB(slug: string) {
+  const cacheKey = `article_${slug}`;
+  const cached = getCached<any>(cacheKey);
+  if (cached) return cached;
+
   try {
     const [rows] = await pool.query<RowDataPacket[]>(
       `SELECT a.*, c.name as category_name, c.slug as category_slug, c.color as category_color
@@ -142,7 +187,9 @@ export async function getArticleBySlugDB(slug: string) {
     );
 
     if (rows.length === 0) return null;
-    return normalizeArticle(rows[0]);
+    const result = normalizeArticle(rows[0]);
+    setCache(cacheKey, result, 120000); // cache article for 2 minutes
+    return result;
   } catch (error) {
     console.error('getArticleBySlugDB error:', error);
     return null;
@@ -205,6 +252,10 @@ export async function getArticlesBySearchDB(query: string, count: number = 20) {
 // ------- CATEGORY QUERIES -------
 
 export async function getCategoriesDB() {
+  const cacheKey = 'all_categories';
+  const cached = getCached<any[]>(cacheKey);
+  if (cached) return cached;
+
   try {
     const [rows] = await pool.query<RowDataPacket[]>(
       `SELECT c.*, COUNT(a.id) as article_count
@@ -214,6 +265,7 @@ export async function getCategoriesDB() {
        GROUP BY c.id
        ORDER BY c.sort_order ASC, c.name ASC`
     );
+    setCache(cacheKey, rows, 300000); // 5 min cache
     return rows;
   } catch (error) {
     console.error('getCategoriesDB error:', error);
@@ -222,12 +274,18 @@ export async function getCategoriesDB() {
 }
 
 export async function getCategoryBySlugDB(slug: string) {
+  const cacheKey = `cat_slug_${slug}`;
+  const cached = getCached<any>(cacheKey);
+  if (cached) return cached;
+
   try {
     const [rows] = await pool.query<RowDataPacket[]>(
       'SELECT * FROM categories WHERE slug = ?',
       [slug]
     );
-    return rows.length > 0 ? rows[0] : null;
+    const result = rows.length > 0 ? rows[0] : null;
+    if (result) setCache(cacheKey, result, 300000); // 5 min cache
+    return result;
   } catch (error) {
     console.error('getCategoryBySlugDB error:', error);
     return null;

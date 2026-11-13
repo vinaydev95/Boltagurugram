@@ -2,6 +2,7 @@ import { Metadata } from 'next';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import Link from 'next/link';
+import { notFound } from 'next/navigation';
 import { getArticleBySlugDB, getRelatedArticlesDB, getLatestArticlesDB, incrementArticleViewsDB } from '@/lib/db-queries';
 import AdBanner from '@/components/AdBanner';
 
@@ -69,18 +70,7 @@ export default async function ArticlePage({ params }: { params: { slug: string }
   }
 
   if (!article) {
-    const title = decodedSlug.replace(/-/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase());
-    return (
-      <div style={{ backgroundColor: 'var(--bg-color)', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-        <Header />
-        <main style={{ maxWidth: '800px', margin: '4rem auto', padding: '0 1rem', flex: 1, textAlign: 'center' }}>
-          <h1 style={{ fontSize: '3rem', fontWeight: '900', marginBottom: '1rem' }}>Article Not Found</h1>
-          <p style={{ color: 'var(--text-light)', marginBottom: '2rem' }}>The article &quot;{title}&quot; could not be found.</p>
-          <Link href="/" style={{ backgroundColor: 'var(--primary-color)', color: 'white', padding: '0.75rem 2rem', borderRadius: '6px', fontWeight: 'bold' }}>← Back to Home</Link>
-        </main>
-        <Footer />
-      </div>
-    );
+    notFound();
   }
 
   // Increment views non-blockingly so SSR response is instant

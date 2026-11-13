@@ -15,9 +15,9 @@ const pool =
     database: process.env.DB_NAME,
     port: Number(process.env.DB_PORT) || 3306,
     waitForConnections: true,
-    connectionLimit: 20,       // increased from 10
-    queueLimit: 50,            // queue up to 50 waiting requests
-    connectTimeout: 10000,     // 10s connection timeout
+    connectionLimit: 30,       // allow up to 30 active connections
+    queueLimit: 0,             // 0 = unlimited queue (PREVENTS "Queue limit reached" error under load)
+    connectTimeout: 20000,     // 20s connection timeout (cross-region Sweden to Mumbai)
     idleTimeout: 60000,        // release idle connections after 60s
     enableKeepAlive: true,
     keepAliveInitialDelay: 0,

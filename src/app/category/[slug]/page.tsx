@@ -2,6 +2,7 @@ import { Metadata } from 'next';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import Link from 'next/link';
+import { notFound } from 'next/navigation';
 import AdBanner from '@/components/AdBanner';
 import { getArticlesByCategoryDB, getCategoryBySlugDB, getTrendingArticlesDB } from '@/lib/db-queries';
 
@@ -47,7 +48,11 @@ export default async function CategoryPage({ params }: { params: { slug: string 
     console.error('CategoryPage data fetch failed:', error);
   }
 
-  const categoryName = cat?.name || decodedSlug.charAt(0).toUpperCase() + decodedSlug.slice(1);
+  if (!cat) {
+    notFound();
+  }
+
+  const categoryName = cat.name;
   const featuredArticle = categoryArticles[0];
   const listArticles = categoryArticles.slice(1);
 
