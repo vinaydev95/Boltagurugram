@@ -4,6 +4,7 @@ import Footer from '@/components/Footer';
 import Link from 'next/link';
 
 export const metadata: Metadata = {
+  alternates: { canonical: '/disclaimer' },
   title: 'Disclaimer (अस्वीकरण) | Bolta Gurugram',
   description: 'Legal disclaimer and content policy for Bolta Gurugram news portal.',
 };

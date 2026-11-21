@@ -3,6 +3,7 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 
 export const metadata: Metadata = {
+  alternates: { canonical: '/privacy-policy' },
   title: 'Privacy Policy | Bolta Gurugram',
   description: 'Privacy Policy for Bolta Gurugram website and Android application.',
 };

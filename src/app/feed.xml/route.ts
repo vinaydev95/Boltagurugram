@@ -21,12 +21,16 @@ export async function GET() {
     articles = await getLatestArticlesDB(50);
   } catch (error) {
     console.error('Error fetching articles for RSS feed:', error);
+    return new NextResponse('Feed temporarily unavailable', {
+      status: 503,
+      headers: { 'Cache-Control': 'no-store', 'Retry-After': '60' },
+    });
   }
 
   const itemsXml = articles
     .map((article: any) => {
       const pubDate = article.created_at ? new Date(article.created_at).toUTCString() : new Date().toUTCString();
-      const articleUrl = `${baseUrl}/article/${article.slug}`;
+      const articleUrl = `${baseUrl}/article/${encodeURIComponent(article.slug)}`;
       const imageUrl = article.image_url || `${baseUrl}/logo.png`;
       const author = article.author || 'Bolta Gurugram Desk';
       const category = article.category_name || 'General';

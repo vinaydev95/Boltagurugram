@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server';
 import pool from '@/lib/db';
 
+// Schema migrations must never run as part of static page generation.
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   try {
     // 1. Add image_url column if it doesn't exist

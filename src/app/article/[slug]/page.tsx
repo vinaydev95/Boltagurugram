@@ -3,24 +3,28 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { getArticleBySlugDB, getRelatedArticlesDB, getLatestArticlesDB, incrementArticleViewsDB } from '@/lib/db-queries';
+import { getArticleBySlugDB, getRelatedArticlesDB, getLatestArticlesDB } from '@/lib/db-queries';
 import AdBanner from '@/components/AdBanner';
 
 import ArticleContentWithAd from '@/components/ArticleContentWithAd';
-import pool from '@/lib/db';
-import { RowDataPacket } from 'mysql2';
+import ArticleView from '@/components/ArticleView';
+import { queryRows } from '@/lib/db';
 
 export const revalidate = 300;
+
+// Cache each published page on its first visit, then retain it if ISR fails.
+export function generateStaticParams() {
+  return [];
+}
 
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
   const decodedSlug = decodeURIComponent(params.slug);
 
-  let article: any = null;
-  try {
-    article = await getArticleBySlugDB(decodedSlug);
-  } catch (error) {
-    console.error('generateMetadata DB error:', error);
+  const article = await getArticleBySlugDB(decodedSlug);
+  if (!article) {
+    notFound();
   }
+  const canonical = `https://boltagurugram.com/article/${encodeURIComponent(article.slug)}`;
   
   // Default values
   const defaultTitle = article?.title || decodedSlug.replace(/-/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase());
@@ -36,11 +40,12 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   return {
     title: title,
     description: desc,
+    alternates: { canonical },
     openGraph: {
       title: title,
       description: desc,
       type: 'article',
-      url: `https://boltagurugram.com/article/${decodedSlug}`,
+      url: canonical,
       images: [
         {
           url: shareImage,
@@ -62,19 +67,11 @@ export async function generateMetadata({ params }: { params: { slug: string } })
 export default async function ArticlePage({ params }: { params: { slug: string } }) {
   const decodedSlug = decodeURIComponent(params.slug);
 
-  let article: any = null;
-  try {
-    article = await getArticleBySlugDB(decodedSlug);
-  } catch (error) {
-    console.error('ArticlePage: failed to fetch article:', error);
-  }
+  const article = await getArticleBySlugDB(decodedSlug);
 
   if (!article) {
     notFound();
   }
-
-  // Increment views non-blockingly so SSR response is instant
-  incrementArticleViewsDB(decodedSlug).catch(console.error);
 
   let related: any[] = [];
   let latestArticles: any[] = [];
@@ -86,7 +83,7 @@ export default async function ArticlePage({ params }: { params: { slug: string }
     [related, latestArticles, adsResult] = await Promise.all([
       getRelatedArticlesDB(article.slug, article.category_id, 4),
       getLatestArticlesDB(5),
-      pool.query<RowDataPacket[]>(
+      queryRows(
         `SELECT * FROM advertisements 
          WHERE (FIND_IN_SET('article_mid', position) > 0 OR position IS NULL OR position = '')
            AND active = 1 
@@ -95,7 +92,7 @@ export default async function ArticlePage({ params }: { params: { slug: string }
            AND COALESCE(starts_at, created_at) <= ? 
          ORDER BY id DESC`,
         [articleDate]
-      ).catch(() => [[] as RowDataPacket[]]),
+      ).then((rows) => [rows]).catch(() => [[]]),
     ]);
   } catch (error) {
     console.error('ArticlePage: failed to fetch related data:', error);
@@ -173,6 +170,7 @@ export default async function ArticlePage({ params }: { params: { slug: string }
 
   return (
     <div style={{ backgroundColor: 'var(--bg-color)', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+      <ArticleView slug={article.slug} />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }}

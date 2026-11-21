@@ -4,6 +4,7 @@ import Footer from '@/components/Footer';
 import Link from 'next/link';
 
 export const metadata: Metadata = {
+  alternates: { canonical: '/about' },
   title: 'About Us | Bolta Gurugram',
   description: 'गुरुग्राम और हरियाणा की सबसे विश्वसनीय डिजिटल हिंदी न्यूज़ वेबसाइट।',
 };

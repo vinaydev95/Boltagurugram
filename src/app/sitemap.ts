@@ -51,32 +51,26 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
   ];
 
-  // If DB is down, return at least the static entries so Google still gets a valid sitemap
-  let articleEntries: MetadataRoute.Sitemap = [];
-  let categoryEntries: MetadataRoute.Sitemap = [];
+  // Propagate a cold database failure so ISR retains the previous full sitemap.
+  const [articles, categories] = await Promise.all([
+    getAllArticleSlugsForSitemapDB(),
+    getCategoriesDB(),
+  ]);
 
-  try {
-    const [articles, categories] = await Promise.all([
-      getAllArticleSlugsForSitemapDB(),
-      getCategoriesDB(),
-    ]);
+  const articleEntries: MetadataRoute.Sitemap = articles.map((art: any) => ({
+    url: `${baseUrl}/article/${encodeURIComponent(art.slug)}`,
+    lastModified: art.updated_at ? new Date(art.updated_at) : new Date(art.created_at || Date.now()),
+    changeFrequency: 'daily' as const,
+    priority: 0.8,
+  }));
 
-    articleEntries = (articles || []).map((art: any) => ({
-      url: `${baseUrl}/article/${art.slug}`,
-      lastModified: art.updated_at ? new Date(art.updated_at) : new Date(art.created_at || Date.now()),
-      changeFrequency: 'daily' as const,
-      priority: 0.8,
-    }));
-
-    categoryEntries = (categories || []).map((cat: any) => ({
-      url: `${baseUrl}/category/${cat.slug}`,
+  const categoryEntries: MetadataRoute.Sitemap = categories
+    .filter((cat: any) => Number(cat.article_count) > 0)
+    .map((cat: any) => ({
+      url: `${baseUrl}/category/${encodeURIComponent(cat.slug)}`,
       lastModified: new Date(),
       changeFrequency: 'daily' as const,
       priority: 0.8,
     }));
-  } catch (error) {
-    console.error('Sitemap DB fetch failed, returning static entries only:', error);
-  }
-
   return [...staticEntries, ...categoryEntries, ...articleEntries];
 }

@@ -4,9 +4,6 @@ import { AuthProvider } from '@/lib/AuthContext'
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://boltagurugram.com'),
-  alternates: {
-    canonical: 'https://boltagurugram.com',
-  },
   robots: {
     index: true,
     follow: true,

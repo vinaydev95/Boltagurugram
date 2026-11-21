@@ -4,6 +4,7 @@ import Footer from '@/components/Footer';
 import Link from 'next/link';
 
 export const metadata: Metadata = {
+  alternates: { canonical: '/editorial-policy' },
   title: 'Editorial & Grievance Policy (संपादकीय एवं सुधार नीति) | Bolta Gurugram',
   description: 'Editorial standards, fact-checking policy, corrections policy, and grievance redressal mechanism for Bolta Gurugram news portal under Indian IT Rules 2021.',
 };

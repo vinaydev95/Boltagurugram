@@ -11,6 +11,11 @@ export async function generateMetadata({ searchParams }: { searchParams: { q?: s
   return {
     title: `Search Results for "${query}" | Bolta Gurugram`,
     description: `Search results for ${query} on Bolta Gurugram.`,
+    robots: {
+      index: false,
+      follow: true,
+      googleBot: { index: false, follow: true },
+    },
   }
 }
 

@@ -4,6 +4,7 @@ import Footer from '@/components/Footer';
 import Link from 'next/link';
 
 export const metadata: Metadata = {
+  alternates: { canonical: '/terms' },
   title: 'Terms and Conditions (नियम और शर्तें) | Bolta Gurugram',
   description: 'Terms and Conditions for Bolta Gurugram website and mobile services.',
 };

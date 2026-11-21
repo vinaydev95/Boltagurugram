@@ -5,14 +5,18 @@ on:
     branches:
       - main
 
+concurrency:
+  group: bolta-gurugram-production
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-
       - name: Deploy to EC2 via SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -20,14 +24,16 @@ jobs:
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
           port: 22
+          command_timeout: 20m
           script: |
-            cd ~/bolta-gurugram
-            git fetch origin main
-            git reset --hard origin/main
-            npm install
-            rm -rf .next
-            npm run build
-            mkdir -p logs
-            pm2 delete bolta-gurugram 2>/dev/null || true
-            pm2 start ecosystem.config.js
-            pm2 save
+            set -eu
+            umask 077
+            deploy_sha='${{ github.sha }}'
+            releases_root="$HOME/bolta-gurugram-releases"
+            mkdir -p "$releases_root"
+            release_dir=$(mktemp -d "$releases_root/$deploy_sha-$(date -u +%Y%m%dT%H%M%SZ)-XXXXXX")
+            git -C "$release_dir" init --quiet
+            git -C "$release_dir" remote add origin https://github.com/vinaydev95/Boltagurugram.git
+            git -C "$release_dir" fetch --depth=1 origin "$deploy_sha"
+            git -C "$release_dir" checkout --quiet --detach FETCH_HEAD
+            bash "$release_dir/scripts/deploy.sh" "$deploy_sha"

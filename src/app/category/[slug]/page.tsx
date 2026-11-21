@@ -8,24 +8,28 @@ import { getArticlesByCategoryDB, getCategoryBySlugDB, getTrendingArticlesDB } f
 
 export const revalidate = 300;
 
+export function generateStaticParams() {
+  return [];
+}
+
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
   const decodedSlug = decodeURIComponent(params.slug);
 
-  let cat: any = null;
-  try {
-    cat = await getCategoryBySlugDB(decodedSlug);
-  } catch (error) {
-    console.error('Category generateMetadata DB error:', error);
+  const cat = await getCategoryBySlugDB(decodedSlug);
+  if (!cat) {
+    notFound();
   }
+  const canonical = `https://boltagurugram.com/category/${encodeURIComponent(cat.slug)}`;
 
   const name = cat?.name || decodedSlug.charAt(0).toUpperCase() + decodedSlug.slice(1);
   return {
     title: `${name} News | Bolta Gurugram`,
     description: `Latest breaking news, updates, and analysis on ${name}. Stay updated with Bolta Gurugram.`,
+    alternates: { canonical },
     openGraph: {
       title: `${name} News | Bolta Gurugram`,
       description: `Latest breaking news, updates, and analysis on ${name}. Stay updated with Bolta Gurugram.`,
-      url: `https://boltagurugram.com/category/${decodedSlug}`,
+      url: canonical,
       siteName: 'Bolta Gurugram',
     }
   }
@@ -34,19 +38,11 @@ export async function generateMetadata({ params }: { params: { slug: string } })
 export default async function CategoryPage({ params }: { params: { slug: string } }) {
   const decodedSlug = decodeURIComponent(params.slug);
 
-  let cat: any = null;
-  let categoryArticles: any[] = [];
-  let trending: any[] = [];
-
-  try {
-    [cat, categoryArticles, trending] = await Promise.all([
-      getCategoryBySlugDB(decodedSlug),
-      getArticlesByCategoryDB(decodedSlug, 20),
-      getTrendingArticlesDB(4),
-    ]);
-  } catch (error) {
-    console.error('CategoryPage data fetch failed:', error);
-  }
+  const [cat, categoryArticles] = await Promise.all([
+    getCategoryBySlugDB(decodedSlug),
+    getArticlesByCategoryDB(decodedSlug, 20),
+  ]);
+  const trending = await getTrendingArticlesDB(4).catch(() => []);
 
   if (!cat) {
     notFound();

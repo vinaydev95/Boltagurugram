@@ -1,4 +1,6 @@
 import mysql from 'mysql2/promise';
+import type { ResultSetHeader, RowDataPacket } from 'mysql2/promise';
+import { queryDatabase } from '@/lib/database-query';
 
 // Singleton pool to prevent multiple pool instances during Next.js hot reloads
 declare global {
@@ -15,9 +17,9 @@ const pool =
     database: process.env.DB_NAME,
     port: Number(process.env.DB_PORT) || 3306,
     waitForConnections: true,
-    connectionLimit: 30,       // allow up to 30 active connections
-    queueLimit: 0,             // 0 = unlimited queue (PREVENTS "Queue limit reached" error under load)
-    connectTimeout: 20000,     // 20s connection timeout (cross-region Sweden to Mumbai)
+    connectionLimit: 30,
+    queueLimit: 60,
+    connectTimeout: 5000,
     idleTimeout: 60000,        // release idle connections after 60s
     enableKeepAlive: true,
     keepAliveInitialDelay: 0,
@@ -26,6 +28,15 @@ const pool =
 // Cache on the global object to survive hot reloads and prevent multiple pool instances
 if (!global._mysqlPool) {
   global._mysqlPool = pool;
+}
+
+// Bound both pool waiting and query execution for public page requests.
+export async function queryRows(sql: string, values: unknown[] = []): Promise<RowDataPacket[]> {
+  return queryDatabase(pool, sql, values);
+}
+
+export async function executeStatement(sql: string, values: unknown[] = []): Promise<ResultSetHeader> {
+  return queryDatabase<ResultSetHeader>(pool, sql, values);
 }
 
 export default pool;

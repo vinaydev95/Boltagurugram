@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import Link from 'next/link';
@@ -6,46 +7,33 @@ import AdBanner from '@/components/AdBanner';
 
 import { getLatestArticlesDB, getTrendingArticlesDB, getArticlesByCategoryDB } from '@/lib/db-queries';
 
+export const metadata: Metadata = {
+  alternates: { canonical: '/' },
+};
+
 // Use ISR with 5-minute revalidation for fast response times and reliable caching
 export const revalidate = 300;
 
 export default async function Home() {
-  let latest: any[] = [];
-  let trending: any[] = [];
-  let cityArticles: any[] = [];
-  let crimeArticles: any[] = [];
-  let politicalArticles: any[] = [];
-  let socialArticles: any[] = [];
-
-  try {
-    [latest, trending, cityArticles, crimeArticles, politicalArticles, socialArticles] = await Promise.all([
-      getLatestArticlesDB(14),
-      getTrendingArticlesDB(5),
-      getArticlesByCategoryDB('city', 4),
-      getArticlesByCategoryDB('crime', 4),
-      getArticlesByCategoryDB('political', 4),
-      getArticlesByCategoryDB('social', 4),
-    ]);
-  } catch (error) {
-    console.error('Homepage data fetch failed:', error);
-    // Page will render with empty arrays — shows "No Articles Yet" fallback
-  }
-
+  const latest = await getLatestArticlesDB(14);
   const heroArticle = latest[0];
   const secondaryArticles = latest.slice(1, 3);
 
   if (!heroArticle) {
-    return (
-      <div style={{ backgroundColor: 'var(--bg-color)', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-        <Header />
-        <main style={{ maxWidth: '1200px', margin: '4rem auto', padding: '0 1rem', flex: 1, textAlign: 'center' }}>
-          <h1 style={{ fontSize: '2rem', fontWeight: 'bold', marginBottom: '1rem' }}>No Articles Yet</h1>
-          <p style={{ color: 'var(--text-light)' }}>Articles will appear here once published from the dashboard.</p>
-        </main>
-        <Footer />
-      </div>
-    );
+    // Fail revalidation so Next.js keeps the last complete homepage.
+    throw new Error('Homepage requires published articles');
   }
+
+  const sections = await Promise.allSettled([
+    getTrendingArticlesDB(5),
+    getArticlesByCategoryDB('city', 4),
+    getArticlesByCategoryDB('crime', 4),
+    getArticlesByCategoryDB('political', 4),
+    getArticlesByCategoryDB('social', 4),
+  ]);
+  const [trending, cityArticles, crimeArticles, politicalArticles, socialArticles] = sections.map(
+    (result) => result.status === 'fulfilled' ? result.value : []
+  );
 
   return (
     <div style={{ backgroundColor: 'var(--bg-color)', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
