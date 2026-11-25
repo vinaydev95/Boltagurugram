@@ -159,6 +159,6 @@ if ! wait_for_site 'http://127.0.0.1:3002'; then
   fail 'The activated release failed live readiness/content checks.'
 fi
 pm2 save
-# Keep only the 3 most recent releases to prevent disk fill
-find "$releases_root" -mindepth 1 -maxdepth 1 -type d | sort -r | tail -n +4 | xargs -r rm -rf 2>/dev/null || true
+# Keep only the 3 most recent releases by time to prevent disk fill
+ls -1td "$releases_root"/*/ | tail -n +4 | xargs -r rm -rf 2>/dev/null || true
 printf 'Release %s is ready on port 3002.\n' "$expected_sha"
