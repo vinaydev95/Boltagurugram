@@ -139,12 +139,9 @@ rollback() {
   fi
 }
 
-# The first migration from the existing fork process can briefly restart it.
-# Later releases use one cluster worker and PM2's overlapping worker reload.
-if [[ "$previous_mode" == 'fork_mode' ]]; then
-  pm2 delete bolta-gurugram
-fi
-if ! pm2 startOrReload "$release_dir/ecosystem.config.js" --only bolta-gurugram --update-env; then
+# Remove previous PM2 process definition so pm_cwd updates to the new release directory
+pm2 delete bolta-gurugram 2>/dev/null || true
+if ! pm2 start "$release_dir/ecosystem.config.js"; then
   rollback || true
   fail 'PM2 could not activate the candidate.'
 fi
@@ -162,4 +159,6 @@ if ! wait_for_site 'http://127.0.0.1:3002'; then
   fail 'The activated release failed live readiness/content checks.'
 fi
 pm2 save
+# Keep only the 3 most recent releases to prevent disk fill
+find "$releases_root" -mindepth 1 -maxdepth 1 -type d | sort -r | tail -n +4 | xargs -r rm -rf 2>/dev/null || true
 printf 'Release %s is ready on port 3002.\n' "$expected_sha"
