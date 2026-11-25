@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import pool from '@/lib/db';
 import { RowDataPacket, ResultSetHeader } from 'mysql2';
 
@@ -60,6 +61,13 @@ export async function POST(request: NextRequest) {
       'INSERT INTO advertisements (title, position, image_url, target_url, active, starts_at, expires_at) VALUES (?, ?, ?, ?, ?, ?, ?)',
       [title, position, image_url, targetUrlSafe, isActive, startsAt, expiresAt]
     );
+
+    // Purge cached pages so new ad appears immediately
+    try {
+      revalidatePath('/', 'layout');
+    } catch (e) {
+      console.error('revalidatePath error:', e);
+    }
 
     return NextResponse.json({ success: true, id: result.insertId });
   } catch (error) {

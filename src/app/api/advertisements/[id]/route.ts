@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import pool from '@/lib/db';
 import { ResultSetHeader } from 'mysql2';
 
@@ -57,6 +58,13 @@ export async function PUT(
     
     await pool.query<ResultSetHeader>(query, values);
     
+    // Purge cached pages so ad updates take effect everywhere immediately
+    try {
+      revalidatePath('/', 'layout');
+    } catch (e) {
+      console.error('revalidatePath error:', e);
+    }
+    
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Error updating advertisement:', error);
@@ -75,6 +83,13 @@ export async function DELETE(
       'DELETE FROM advertisements WHERE id = ?',
       [id]
     );
+    
+    // Purge cached pages so deleted ads disappear everywhere immediately
+    try {
+      revalidatePath('/', 'layout');
+    } catch (e) {
+      console.error('revalidatePath error:', e);
+    }
     
     return NextResponse.json({ success: true });
   } catch (error) {
