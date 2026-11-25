@@ -311,10 +311,35 @@ export default function AdsPage() {
 
                   <td style={{ padding: '1rem', whiteSpace: 'nowrap' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                      <button onClick={() => toggleActive(ad)} style={{ padding: '0.25rem 0.5rem', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 'bold', border: 'none', cursor: 'pointer', backgroundColor: ad.active ? '#dcfce7' : '#fee2e2', color: ad.active ? '#166534' : '#991b1b' }}>
-                        {ad.active ? 'Active' : 'Inactive'}
-                      </button>
-                      <LiveTimer startsAt={ad.starts_at} expiresAt={ad.expires_at} />
+                      {(() => {
+                        const now = Date.now();
+                        const isExpired = ad.expires_at && new Date(ad.expires_at).getTime() < now;
+
+                        if (!ad.active) {
+                          return (
+                            <button onClick={() => toggleActive(ad)} title="Click to enable" style={{ padding: '0.25rem 0.6rem', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 'bold', border: 'none', cursor: 'pointer', backgroundColor: '#fee2e2', color: '#991b1b' }}>
+                              Inactive
+                            </button>
+                          );
+                        }
+
+                        if (isExpired) {
+                          return (
+                            <span style={{ padding: '0.25rem 0.6rem', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 'bold', backgroundColor: '#fee2e2', color: '#dc2626', border: '1px solid #fecaca' }}>
+                              Expired
+                            </span>
+                          );
+                        }
+
+                        return (
+                          <>
+                            <button onClick={() => toggleActive(ad)} title="Click to pause" style={{ padding: '0.25rem 0.6rem', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 'bold', border: 'none', cursor: 'pointer', backgroundColor: '#dcfce7', color: '#166534' }}>
+                              Active
+                            </button>
+                            <LiveTimer startsAt={ad.starts_at} expiresAt={ad.expires_at} />
+                          </>
+                        );
+                      })()}
                     </div>
                   </td>
                   <td style={{ 
