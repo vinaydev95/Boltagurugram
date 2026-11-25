@@ -17,9 +17,9 @@ const pool =
     database: process.env.DB_NAME,
     port: Number(process.env.DB_PORT) || 3306,
     waitForConnections: true,
-    connectionLimit: 30,
-    queueLimit: 60,
-    connectTimeout: 5000,
+    connectionLimit: 15,       // RDS max_connections is 60 (shared with RishteyNCR)
+    queueLimit: 0,             // 0 = unlimited waiting queue (prevents ER_CON_COUNT_ERROR)
+    connectTimeout: 10000,
     idleTimeout: 60000,        // release idle connections after 60s
     enableKeepAlive: true,
     keepAliveInitialDelay: 0,
